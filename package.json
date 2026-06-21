@@ -1,0 +1,30 @@
+{
+  "name": "playwright-automation-exercise",
+  "version": "1.0.0",
+  "description": "Automated UI and API testing framework for AutomationExercise.com built using Playwright and TypeScript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:chromium": "npx playwright test --project=chromium",
+    "report": "npx playwright show-report"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "automation-exercise",
+    "test-automation",
+    "e2e-testing",
+    "api-testing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^26.0.0"
+  },
+  "allowScripts": {
+    "fsevents@2.3.2": true
+  }
+}
