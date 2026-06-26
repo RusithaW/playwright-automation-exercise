@@ -10,6 +10,11 @@ export class AuthActions {
         this.authLocators = new AuthLocators(page);
     }
 
+    // Handles navigating directly to home base URL
+    async navigateToHome() {
+        await this.page.goto('/');
+    }
+
     // Navigates directly to the Auth view using the base URL setup
     async navigateToSignupLogin() {
         await this.page.goto('/login');
@@ -40,10 +45,16 @@ export class AuthActions {
         await this.authLocators.monthsSelect.selectOption('5');
         await this.authLocators.yearsSelect.selectOption('1995');
 
+        // Select Newsletter and Partner Checkboxes
+        await this.authLocators.newsletterCheckbox.check();
+        await this.authLocators.partnersCheckbox.check();
+
         // Enter Address Info
         await this.authLocators.firstNameInput.fill('John');
         await this.authLocators.lastNameInput.fill('Doe');
+        await this.authLocators.companyInput.fill('QA Solutions');
         await this.authLocators.addressInput.fill('123 Automation St.');
+        await this.authLocators.address2Input.fill('Floor 2');
         await this.authLocators.countrySelect.selectOption('United States');
         await this.authLocators.stateInput.fill('California');
         await this.authLocators.cityInput.fill('Los Angeles');
@@ -52,5 +63,15 @@ export class AuthActions {
 
         // Submit the comprehensive registration form
         await this.authLocators.createAccountButton.click();
+    }
+
+    // Handles execution of clicking layout navigation logout link element
+    async logout() {
+        await this.authLocators.logoutLink.click();
+    }
+
+    // Handles execution of clicking layout navigation delete account link element
+    async deleteAccount() {
+        await this.authLocators.deleteAccountLink.click();
     }
 }
