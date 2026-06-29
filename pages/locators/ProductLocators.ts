@@ -3,15 +3,19 @@ import { Page, Locator } from '@playwright/test';
 export class ProductLocators {
     readonly page: Page;
 
-    // Product page selectors
+    // All Products grid & page elements
     readonly productTitle: Locator;
     readonly productHeader: Locator;
-    readonly addToCartButton: Locator;
-    readonly productDescription: Locator;
-    readonly viewProductButton: Locator; // Updated for the first product
-    readonly productsGrid: Locator;       // Added for step 6
+    readonly productsGrid: Locator;
+    readonly viewProductButton: Locator;
 
-    // Product detail page selectors (Added for step 9)
+    // Search bar elements
+    readonly searchInput: Locator;
+    readonly searchButton: Locator;
+    readonly searchedProductsHeader: Locator;
+    readonly productItems: Locator;
+
+    // Product detail view card elements
     readonly productInfoContainer: Locator;
     readonly productName: Locator;
     readonly productCategory: Locator;
@@ -23,21 +27,22 @@ export class ProductLocators {
     constructor(page: Page) {
         this.page = page;
 
-        // Initialize locators for the product page
+        // Base selectors
         this.productTitle = page.locator('text= Products');
         this.productHeader = page.locator('h2:has-text("All Products")');
-        this.addToCartButton = page.locator('text=Add to Cart');
-        this.productDescription = page.locator('text=Product Description');
         this.productsGrid = page.locator('.features_items');
-
-        // Fix: Use .first() so Playwright knows to grab the first "View Product" link in the grid
         this.viewProductButton = page.locator('text=View Product').first();
 
-        // Product detail page locators
+        // Search bar selectors - Fixed syntax to use correct CSS attributes
+        this.searchInput = page.locator('input#search_product');
+        this.searchButton = page.locator('button#submit_search');
+        this.searchedProductsHeader = page.locator('h2:has-text("Searched Products")');
+        this.productItems = page.locator('.features_items .product-image-wrapper');
+
+        // Individual item details card block selectors
         this.productInfoContainer = page.locator('.product-information');
         this.productName = this.productInfoContainer.locator('h2');
         this.productCategory = this.productInfoContainer.getByText('Category:');
-        //this.productPrice = this.productInfoContainer.locator('span >> text=$');
         this.productPrice = this.productInfoContainer.locator('span', { hasText: /Rs\./ });
         this.productAvailability = this.productInfoContainer.getByText('Availability:');
         this.productCondition = this.productInfoContainer.getByText('Condition:');

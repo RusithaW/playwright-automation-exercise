@@ -10,13 +10,19 @@ export class ProductActions {
         this.productLocators = new ProductLocators(page);
     }
 
-    // Navigates to the Products page
+    // Navigates directly to the global products overview catalog URL context
     async navigateToProducts() {
         await this.page.goto('/products');
     }
 
-    // Clicks on the first 'View Product' link (Added)
+    // Opens the details sheet for the first product displayed in the active list
     async clickFirstProduct() {
         await this.productLocators.viewProductButton.click();
+    }
+
+    // Enters a search parameter and submits the query
+    async searchProduct(productName: string) {
+        await this.productLocators.searchInput.fill(productName);
+        await this.productLocators.searchButton.click();
     }
 }
