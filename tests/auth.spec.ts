@@ -103,6 +103,16 @@ test.describe('User Authentication Tests', () => {
   });
 
   test('Test Case 4: Logout User', async ({ page }) => {
+    const tc4DynamicEmail = `tc4_tester_${Date.now()}@example.com`;
+
+    // Dynamic background user creation so Test Case 4 has a guaranteed active user account
+    await auth.navigateToHome();
+    await auth.navigateToSignupLogin();
+    await auth.fillSignupForm('QA Automation Tester', tc4DynamicEmail);
+    await auth.fillAccountDetailsForm(commonPassword);
+    await page.locator('[data-qa="continue-button"]').click();
+    await auth.logout();
+
     // 1-3. Launch, navigate to url, and verify that home page is visible successfully
     await auth.navigateToHome();
     await expect(auth.authLocators.homeFeaturedItems).toBeVisible();
@@ -113,11 +123,11 @@ test.describe('User Authentication Tests', () => {
     await expect(loginHeader).toHaveText('Login to your account');
 
     // 6-7. Enter correct email address and password and click 'login' button
-    await auth.loginExistingUser(staticEmail, staticPassword);
+    await auth.loginExistingUser(tc4DynamicEmail, commonPassword);
 
     // 8. Verify that 'Logged in as username' is visible
     const loggedInText = page.locator('header .navbar-nav');
-    await expect(loggedInText).toContainText('Logged in as');
+    await expect(loggedInText).toContainText('Logged in as QA Automation Tester');
 
     // 9-10. Click 'Logout' button and verify that user is navigated to login page
     await auth.logout();
