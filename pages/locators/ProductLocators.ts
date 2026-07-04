@@ -30,6 +30,10 @@ export class ProductLocators {
     readonly continueShoppingButton: Locator;
     readonly viewCartModalLink: Locator;
 
+    // [TC13 Addition]: Core input handlers for fine-tuned details modifications
+    readonly quantityInput: Locator;
+    readonly addToCartDetailButton: Locator;
+
     constructor(page: Page) {
         this.page = page;
 
@@ -59,5 +63,9 @@ export class ProductLocators {
         this.secondProductCard = page.locator('.features_items .col-sm-4').nth(1);
         this.continueShoppingButton = page.locator('button.btn.btn-success.close-modal.btn-block');
         this.viewCartModalLink = page.locator('.modal-body a:has-text("View Cart")');
+
+        // [TC13 Addition]: Core input handlers for fine-tuned details modifications
+        this.quantityInput = page.locator('input#quantity');
+        this.addToCartDetailButton = page.locator('button.btn.btn-default.cart');
     }
 }

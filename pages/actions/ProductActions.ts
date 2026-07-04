@@ -26,10 +26,17 @@ export class ProductActions {
         await this.productLocators.searchButton.click();
     }
 
+    // [TC12 Addition]: Sequences multi-layered overlays without letting thread executions collide
     async addTwoProductsSequential() {
         await this.productLocators.firstProductCard.locator('.add-to-cart').first().click();
         await this.productLocators.continueShoppingButton.click();
         await this.productLocators.secondProductCard.locator('.add-to-cart').first().click();
         await this.productLocators.viewCartModalLink.click();
+    }
+
+    // [TC13 Addition]: Core input handlers for fine-tuned details modifications
+    async setProductQuantityAndAddToCart(quantity: string) {
+        await this.productLocators.quantityInput.fill(quantity.toString());
+        await this.productLocators.addToCartDetailButton.click();
     }
 }
