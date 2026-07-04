@@ -25,4 +25,11 @@ export class ProductActions {
         await this.productLocators.searchInput.fill(productName);
         await this.productLocators.searchButton.click();
     }
+
+    async addTwoProductsSequential() {
+        await this.productLocators.firstProductCard.locator('.add-to-cart').first().click();
+        await this.productLocators.continueShoppingButton.click();
+        await this.productLocators.secondProductCard.locator('.add-to-cart').first().click();
+        await this.productLocators.viewCartModalLink.click();
+    }
 }

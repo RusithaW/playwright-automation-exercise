@@ -24,6 +24,12 @@ export class ProductLocators {
     readonly productCondition: Locator;
     readonly productBrand: Locator;
 
+    // Additional product card elements for specific product interactions
+    readonly firstProductCard: Locator;
+    readonly secondProductCard: Locator;
+    readonly continueShoppingButton: Locator;
+    readonly viewCartModalLink: Locator;
+
     constructor(page: Page) {
         this.page = page;
 
@@ -47,5 +53,11 @@ export class ProductLocators {
         this.productAvailability = this.productInfoContainer.getByText('Availability:');
         this.productCondition = this.productInfoContainer.getByText('Condition:');
         this.productBrand = this.productInfoContainer.getByText('Brand:');
+
+        // Additional product card elements for specific product interactions
+        this.firstProductCard = page.locator('.features_items .col-sm-4').nth(0);
+        this.secondProductCard = page.locator('.features_items .col-sm-4').nth(1);
+        this.continueShoppingButton = page.locator('button.btn.btn-success.close-modal.btn-block');
+        this.viewCartModalLink = page.locator('.modal-body a:has-text("View Cart")');
     }
 }
