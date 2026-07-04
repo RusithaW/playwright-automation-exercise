@@ -14,4 +14,20 @@ export class HomeActions {
     async navigateToTestCases() {
         await this.homeLocators.testCasesLink.click();
     }
+
+    //Scroll down to the footer widget container block
+    async scrollToFooter() {
+        await this.homeLocators.subscriptionText.scrollIntoViewIfNeeded();
+    }
+
+    // Fills the subscription form with the provided email and submits it
+    async subscribe(email: string) {
+        await this.homeLocators.subscriptionInput.fill(email);
+        await this.homeLocators.subscriptionButton.click();
+    }
+
+    // Waits for the subscription success alert to be visible
+    async waitForSubscriptionSuccessAlert() {
+        await this.homeLocators.subscriptionSuccessAlert.waitFor({ state: 'visible' });
+    }
 }

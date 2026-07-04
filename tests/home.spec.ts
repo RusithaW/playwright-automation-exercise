@@ -22,4 +22,18 @@ test.describe('Home Page Navigation and Test Cases', () => {
         await home.navigateToTestCases();
         await expect(home.homeLocators.testCasesHeader).toHaveText('Test Cases');
     });
+
+    test('Test Case 10: Verify Subscription in home page footer', async ({ page }) => {
+        // Navigate to the application landing page and verify visibility
+        await auth.navigateToHome();
+        await expect(auth.authLocators.homeFeaturedItems).toBeVisible();
+
+        // Scroll to the footer and verify the subscription text
+        await home.scrollToFooter();
+        await expect(home.homeLocators.subscriptionText).toHaveText('Subscription');
+
+        // Fill the subscription form with a valid email and submit
+        await home.subscribe('tester_home@example.com');
+        await home.waitForSubscriptionSuccessAlert();
+    });
 });

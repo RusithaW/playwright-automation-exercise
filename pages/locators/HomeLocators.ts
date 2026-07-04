@@ -7,9 +7,11 @@ export class HomeLocators {
     readonly testCasesLink: Locator;
     readonly testCasesHeader: Locator;
 
+    //Subscription elements
     readonly subscriptionText: Locator;
     readonly subscriptionInput: Locator;
     readonly subscriptionButton: Locator;
+    readonly subscriptionSuccessAlert: Locator;
 
 
     constructor(page: Page) {
@@ -19,8 +21,10 @@ export class HomeLocators {
         this.testCasesLink = page.locator('.navbar-nav a:has-text("Test Cases")');
         this.testCasesHeader = page.locator('h2:has-text("Test Cases")');
 
-        this.subscriptionText = page.locator('.footer-widget a:has-text("Subscription")');
+        // Target the standard subscription elements
+        this.subscriptionText = page.locator('.footer-widget h2, .single-widget h2');
         this.subscriptionInput = page.locator('#susbscribe_email');
         this.subscriptionButton = page.locator('#subscribe');
+        this.subscriptionSuccessAlert = page.locator('#success-subscribe .alert-success');
     }
 }
