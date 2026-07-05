@@ -147,4 +147,76 @@ test.describe('Transaction Flow', () => {
         await expect(checkoutActions.checkoutLocators.accountDeletedHeader).toHaveText('Account Deleted!');
         await checkoutActions.clickContinue();
     });
+
+
+    test('Test Case 16: Place Order: Login before Checkout', async ({ page }) => {
+        // Generate values unique to this single test runner worker
+        const dynamicEmail = `tester_login_flow_${Date.now()}@example.com`;
+        const commonPassword = process.env.TEST_USER_PASSWORD || 'FallbackPass123!';
+        const username = 'QA Automation Tester';
+
+        // SETUP STAGE: Build the target account first
+        await authActions.navigateToHome();
+        await authActions.navigateToSignupLogin();
+        await authActions.fillSignupForm(username, dynamicEmail);
+        await authActions.fillAccountDetailsForm(commonPassword);
+        await page.locator('[data-qa="continue-button"]').click();
+        await authActions.logout(); // Account is ready, log out to satisfy step 4
+
+        // 1-2. Launch browser & Navigate to url
+        await authActions.navigateToHome();
+
+        // 3. Verify that home page is visible successfully
+        await expect(authActions.authLocators.homeFeaturedItems).toBeVisible();
+
+        // 4. Click 'Signup / Login' button
+        await authActions.navigateToSignupLogin();
+        await page.waitForURL('**/login');
+
+        // 5. Fill email, password and click 'Login' button
+        await authActions.loginExistingUser(dynamicEmail, commonPassword);
+
+        // 6. Verify 'Logged in as username' at top
+        await expect(checkoutActions.checkoutLocators.navbarContainer).toContainText(`Logged in as ${username}`);
+
+        // Handle hydration lag before proceeding to shop items
+        await page.waitForLoadState('networkidle');
+
+        // 7. Add products to cart
+        await productActions.addTwoProductsSequential();
+
+        // 8. Click 'Cart' button
+        await cartActions.cartLocators.navbarCartLink.click();
+
+        // 9. Verify that cart page is displayed
+        await expect(cartActions.cartLocators.cartBreadcrumb).toBeVisible();
+
+        // 10. Click Proceed To Checkout
+        await cartActions.clickProceedToCheckout();
+
+        // 11. Verify Address Details and Review Your Order
+        await checkoutActions.verifyAddressDetailsAndReviewOrder();
+        await expect(checkoutActions.checkoutLocators.deliveryAddressDetails).toBeVisible();
+        await expect(checkoutActions.checkoutLocators.billingAddressDetails).toBeVisible();
+
+        // 12. Enter description in comment text area and click 'Place Order'
+        await checkoutActions.fillOrderCommentAndPlaceOrder('Please ship this as a gift.');
+        await page.waitForURL('**/payment');
+
+        // 13. Enter payment details
+        await checkoutActions.fillPaymentDetails('QA Tester', '4111111111111111', '123', '12', '2026');
+
+        // 14. Click 'Pay and Confirm Order' button
+        await checkoutActions.submitPayment();
+
+        // 15. Verify success message
+        await checkoutActions.verifyOrderSuccess();
+
+        // 16. Click 'Delete Account' button
+        await authActions.deleteAccount();
+
+        // 17. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+        await expect(checkoutActions.checkoutLocators.accountDeletedHeader).toHaveText('Account Deleted!');
+        await checkoutActions.clickContinue();
+    });
 });
