@@ -34,6 +34,10 @@ export class ProductLocators {
     readonly quantityInput: Locator;
     readonly addToCartDetailButton: Locator;
 
+    // Sidebar elements for category navigation
+    readonly categorySidebar: Locator;
+    readonly categoryTitleHeader: Locator;
+
     constructor(page: Page) {
         this.page = page;
 
@@ -67,5 +71,22 @@ export class ProductLocators {
         // [TC13 Addition]: Core input handlers for fine-tuned details modifications
         this.quantityInput = page.locator('input#quantity');
         this.addToCartDetailButton = page.locator('button.btn.btn-default.cart');
+
+        this.categorySidebar = page.locator('#accordian');
+        this.categoryTitleHeader = page.locator('.features_items h2.title');
+    }
+
+    /**
+     * [TC18 Fixed]: Dynamically target top-level category panel headers (Women, Men, Kids)
+     */
+    getCategoryGroupHeader(gender: 'Women' | 'Men' | 'Kids'): Locator {
+        return this.page.locator(`a[href="#${gender}"]`);
+    }
+
+    /**
+     * [TC18 Fixed]: Dynamically target inner category sub-links inside explicit accordion groups
+     */
+    getCategorySubLink(gender: 'Women' | 'Men' | 'Kids', subCategoryName: string): Locator {
+        return this.page.locator(`#${gender} a`, { hasText: subCategoryName });
     }
 }

@@ -59,4 +59,47 @@ test.describe('Products Page Navigation and Search Validations', () => {
             expect(nameText?.toLowerCase()).toContain(searchTerm.toLowerCase());
         }
     });
+
+    test('Test Case 18: View Category Products', async ({ page }) => {
+        // 1-2. Launch browser & Navigate to url
+        await auth.navigateToHome();
+
+        // 3. Verify that categories are visible on left side bar
+        await expect(product.productLocators.categorySidebar).toBeVisible();
+
+        // TIMING FIX: Give the platform's flaky Bootstrap script 1 second to bind its event handlers to the DOM
+        await page.waitForTimeout(1000);
+
+        // 4. Click on 'Women' category accordion heading to expand it
+        await product.productLocators.getCategoryGroupHeader('Women').click();
+
+        // Verify the container successfully toggled open by checking for the Bootstrap 'in' style class
+        const womenPanel = page.locator('#Women');
+        await expect(womenPanel).toHaveClass(/collapse in|collapsing/);
+
+        // 5. Click on 'Dress' sub-category link under 'Women' category
+        const dressLink = product.productLocators.getCategorySubLink('Women', 'Dress');
+        await dressLink.click();
+
+        // 6. Verify that category page is displayed and confirm header text matches
+        await expect(page).toHaveURL(/.*category_products.*/);
+        await expect(product.productLocators.categoryTitleHeader).toHaveText('Women - Dress Products', { ignoreCase: true });
+
+        // TIMING FIX: Brief pause for page switch state normalization
+        await page.waitForTimeout(1000);
+
+        // 7. On left side bar, click on any sub-category link of 'Men' category (e.g., Tshirts)
+        await product.productLocators.getCategoryGroupHeader('Men').click();
+
+        // Verify the men's container toggled open successfully
+        const menPanel = page.locator('#Men');
+        await expect(menPanel).toHaveClass(/collapse in|collapsing/);
+
+        const tshirtsLink = product.productLocators.getCategorySubLink('Men', 'Tshirts');
+        await tshirtsLink.click();
+
+        // 8. Verify that user is navigated to that category page successfully
+        await expect(page).toHaveURL(/.*category_products.*/);
+        await expect(product.productLocators.categoryTitleHeader).toHaveText('Men - Tshirts Products', { ignoreCase: true });
+    });
 });
