@@ -22,6 +22,7 @@ export class AuthActions {
 
     // Handles the initial signup card actions (Right side of screen)
     async fillSignupForm(name: string, email: string) {
+        await this.authLocators.signupNameInput.waitFor({ state: 'visible' });
         await this.authLocators.signupNameInput.fill(name);
         await this.authLocators.signupEmailInput.fill(email);
         await this.authLocators.signupButton.click();

@@ -12,6 +12,12 @@ export class CartActions {
 
     // Navigates directly to the global checkout / cart bucket route context
     async navigateToCart() {
-        await this.page.goto('/view_cart');
+        await this.cartLocators.navbarCartLink.click();
+    }
+
+    async clickProceedToCheckout() {
+        await this.page.waitForLoadState('networkidle');
+        await this.cartLocators.proceedToCheckoutButton.waitFor({ state: 'visible' });
+        await this.cartLocators.proceedToCheckoutButton.click();
     }
 }
