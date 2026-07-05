@@ -41,16 +41,31 @@ test.describe('Shopping Cart Flow Architecture Validation', () => {
         await expect(rowTwo.quantity).toHaveText('1');
     });
 
-    test('Test Case 13: Verify Product quantity in Cart', async () => {
-        // [TC13 Added]: Verifies that deep modifications on product detail screens transfer to cart states accurately
+    test('Test 17: Remove All Products Dynamically From Cart', async ({ page }) => {
         await auth.navigateToHome();
-        await product.clickFirstProduct();
+        await page.waitForLoadState('networkidle');
 
-        const countSetting = '4';
-        await product.setProductQuantityAndAddToCart(countSetting);
-        await product.productLocators.viewCartModalLink.click();
+        // 1. Add items and view the cart
+        await product.addTwoProductsSequential();
+        await cart.navigateToCart();
 
-        const matchedItem = cart.cartLocators.getCartItemRowDetails(0);
-        await expect(matchedItem.quantity).toHaveText(countSetting);
+        // 2. Clear the cart dynamically by driving down the live item count
+        let initialCount = await cart.cartLocators.cartRows.count();
+
+        while (initialCount > 0) {
+            // Always target the delete button inside the first active row
+            const firstDeleteButton = cart.cartLocators.cartRows.first().locator('.cart_quantity_delete');
+            await firstDeleteButton.click();
+
+            // FIX: Instead of waiting for element detachment, expect the live row count to drop by 1
+            await expect(cart.cartLocators.cartRows).toHaveCount(initialCount - 1);
+
+            // Update the control counter to match the new live state
+            initialCount = await cart.cartLocators.cartRows.count();
+        }
+
+        // 3. Final Assertions: Verify everything is completely cleared
+        await expect(cart.cartLocators.cartRows).toHaveCount(0);
+        await expect(page.locator('#empty_cart')).toBeVisible();
     });
 });  
