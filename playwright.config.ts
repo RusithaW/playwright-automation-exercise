@@ -6,7 +6,6 @@ import path from 'path';
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-// This will intercept network requests and abort any from Google Ads or Analytics
 export default defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
@@ -19,11 +18,20 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+
+  /* Unified Timeouts */
+  timeout: 60000,          // 60 seconds total test limit (gives slow server room to breathe)
+  expect: {
+    timeout: 10000,        // 10 seconds for UI elements to assert visible
+  },
+
+  /* Shared settings for all the projects below. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
+    /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.BASE_URL || 'https://automationexercise.com',
     trace: 'on-first-retry',
+    actionTimeout: 15000,     // 15 seconds limit per click/fill action
+    navigationTimeout: 30000,  // 30 seconds limit for initial page loading
     contextOptions: {
       extraHTTPHeaders: {
         'Accept-Language': 'en-US',

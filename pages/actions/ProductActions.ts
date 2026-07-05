@@ -29,8 +29,10 @@ export class ProductActions {
     // [TC12 Addition]: Sequences multi-layered overlays without letting thread executions collide
     async addTwoProductsSequential() {
         await this.productLocators.firstProductCard.locator('.add-to-cart').first().click();
+        await this.productLocators.continueShoppingButton.waitFor({ state: 'visible' });
         await this.productLocators.continueShoppingButton.click();
         await this.productLocators.secondProductCard.locator('.add-to-cart').first().click();
+        await this.productLocators.viewCartModalLink.waitFor({ state: 'visible' });
         await this.productLocators.viewCartModalLink.click();
     }
 

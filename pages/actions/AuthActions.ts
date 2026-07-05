@@ -12,7 +12,7 @@ export class AuthActions {
 
     // Handles navigating directly to home base URL
     async navigateToHome() {
-        await this.page.goto('/');
+        await this.page.goto('/', { waitUntil: 'commit', timeout: 20000 });
     }
 
     // Navigates directly to the Auth view using the base URL setup
