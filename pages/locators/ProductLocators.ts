@@ -37,6 +37,8 @@ export class ProductLocators {
     // Sidebar elements for category navigation
     readonly categorySidebar: Locator;
     readonly categoryTitleHeader: Locator;
+    readonly brandSidebar: Locator;
+    readonly brandTitleHeader: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -74,6 +76,8 @@ export class ProductLocators {
 
         this.categorySidebar = page.locator('#accordian');
         this.categoryTitleHeader = page.locator('.features_items h2.title');
+        this.brandSidebar = page.locator('.brands_products');
+        this.brandTitleHeader = page.locator('.features_items h2.title');
     }
 
     /**
@@ -82,11 +86,12 @@ export class ProductLocators {
     getCategoryGroupHeader(gender: 'Women' | 'Men' | 'Kids'): Locator {
         return this.page.locator(`a[href="#${gender}"]`);
     }
-
     /**
      * [TC18 Fixed]: Dynamically target inner category sub-links inside explicit accordion groups
      */
     getCategorySubLink(gender: 'Women' | 'Men' | 'Kids', subCategoryName: string): Locator {
         return this.page.locator(`#${gender} a`, { hasText: subCategoryName });
     }
+
+    getBrandLink(brandName: string): Locator { return this.page.locator('.brands-name a', { hasText: brandName }); }
 }

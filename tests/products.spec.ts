@@ -102,4 +102,30 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await expect(page).toHaveURL(/.*category_products.*/);
         await expect(product.productLocators.categoryTitleHeader).toHaveText('Men - Tshirts Products', { ignoreCase: true });
     });
+
+    test('Test Case 19: View & Cart Brand Products', async ({ page }) => {
+        // 1-2. Launch browser & Navigate to url
+        await auth.navigateToHome();
+
+        // 3. Click on 'Products' button
+        // Assuming your 'product' POM instance has a navigation handler or header navigation
+        await page.getByRole('link', { name: ' Products' }).click();
+
+        // 4. Verify that Brands are visible on left side bar
+        await expect(product.productLocators.brandSidebar).toBeVisible();
+
+        // 5. Click on any brand name (e.g., Polo)
+        await product.productLocators.getBrandLink('Polo').click();
+
+        // 6. Verify that user is navigated to brand page and brand products are displayed
+        await expect(page).toHaveURL(/.*brand_products.*/);
+        await expect(product.productLocators.brandTitleHeader).toHaveText('Brand - Polo Products', { ignoreCase: true });
+
+        // 7. On left side bar, click on any other brand link (e.g., H&M)
+        await product.productLocators.getBrandLink('H&M').click();
+
+        // 8. Verify that user is navigated to that brand page and can see products
+        await expect(page).toHaveURL(/.*brand_products.*/);
+        await expect(product.productLocators.brandTitleHeader).toHaveText('Brand - H&M Products', { ignoreCase: true });
+    });
 });
