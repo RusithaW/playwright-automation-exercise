@@ -41,6 +41,13 @@ export class ProductActions {
         await this.productLocators.quantityInput.fill(String(quantity));
     }
 
+    async submitReview(name: string, email: string, reviewText: string) {
+        await this.productLocators.reviewNameInput.fill(name);
+        await this.productLocators.reviewEmailInput.fill(email);
+        await this.productLocators.reviewTextArea.fill(reviewText);
+        await this.productLocators.reviewSubmitButton.click();
+    }
+
     async addToCartFromDetailPage() {
         await this.productLocators.addToCartDetailButton.click();
     }

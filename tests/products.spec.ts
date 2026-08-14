@@ -211,4 +211,35 @@ test.describe('Products Page Navigation and Search Validations', () => {
         const postLoginCartItemsRow = page.locator('#cart_info_table tbody tr');
         await expect(postLoginCartItemsRow).toHaveCount(totalItemsCount);
     });
+
+    test('Test Case 21: Add review on product', async ({ page }) => {
+        const reviewData = {
+            name: 'Rusitha Dilshan',
+            email: 'testuser@example.com',
+            text: 'Great quality product! Very satisfied with the material and fast shipping.'
+        };
+
+        // 1-2. Launch browser & Navigate to url
+        await auth.navigateToHome();
+
+        // 3. Click on 'Products' button
+        await product.navigateToProducts();
+
+        // 4. Verify user is navigated to ALL PRODUCTS page successfully
+        await expect(product.productLocators.productHeader).toHaveText('All Products');
+
+        // 5. Click on 'View Product' button
+        await product.clickFirstProduct();
+        await expect(page).toHaveURL(/.*product_details.*/);
+
+        // 6. Verify 'Write Your Review' is visible
+        await expect(product.productLocators.writeReviewHeader).toBeVisible();
+
+        // 7-8. Enter name, email, review and click 'Submit' button
+        await product.submitReview(reviewData.name, reviewData.email, reviewData.text);
+
+        // 9. Verify success message 'Thank you for your review.'
+        await expect(product.productLocators.reviewSuccessAlert).toBeVisible();
+        await expect(product.productLocators.reviewSuccessAlert).toContainText('Thank you for your review.');
+    });
 });

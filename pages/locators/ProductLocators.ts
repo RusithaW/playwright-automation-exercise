@@ -34,6 +34,14 @@ export class ProductLocators {
     readonly quantityInput: Locator;
     readonly addToCartDetailButton: Locator;
 
+    // Product Review form locators
+    readonly writeReviewHeader: Locator;
+    readonly reviewNameInput: Locator;
+    readonly reviewEmailInput: Locator;
+    readonly reviewTextArea: Locator;
+    readonly reviewSubmitButton: Locator;
+    readonly reviewSuccessAlert: Locator;
+
     // Sidebar elements for category navigation
     readonly categorySidebar: Locator;
     readonly categoryTitleHeader: Locator;
@@ -74,6 +82,14 @@ export class ProductLocators {
         // [TC13 Addition]: Core input handlers for fine-tuned details modifications
         this.quantityInput = page.locator('input#quantity');
         this.addToCartDetailButton = page.locator('button.btn.btn-default.cart');
+
+        // Product Review form locators
+        this.writeReviewHeader = page.locator('a[href="#reviews"]');
+        this.reviewNameInput = page.locator('input#name');
+        this.reviewEmailInput = page.locator('input#email');
+        this.reviewTextArea = page.locator('textarea#review');
+        this.reviewSubmitButton = page.locator('#button-review');
+        this.reviewSuccessAlert = page.locator('#review-section').getByText('Thank you for your review.');
 
         this.categorySidebar = page.locator('#accordian');
         this.categoryTitleHeader = page.locator('.features_items h2.title');
