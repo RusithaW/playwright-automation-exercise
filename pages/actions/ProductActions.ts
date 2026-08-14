@@ -37,8 +37,28 @@ export class ProductActions {
     }
 
     // [TC13 Addition]: Core input handlers for fine-tuned details modifications
-    async setProductQuantityAndAddToCart(quantity: string) {
-        await this.productLocators.quantityInput.fill(quantity.toString());
+    async setProductQuantity(quantity: string | number) {
+        await this.productLocators.quantityInput.fill(String(quantity));
+    }
+
+    async addToCartFromDetailPage() {
         await this.productLocators.addToCartDetailButton.click();
+    }
+
+    async addAllVisibleProductsToCart() {
+        const count = await this.productLocators.productCards.count();
+
+        for (let i = 0; i < count; i++) {
+            const productCard = this.productLocators.productCards.nth(i);
+
+            // Fixed: Appended .first() to isolate the primary layout button and dodge the hover copy elements
+            const addToCartButton = productCard.locator('.add-to-cart').first();
+            await productCard.scrollIntoViewIfNeeded();
+            if (await addToCartButton.isVisible()) {
+                await addToCartButton.click();
+                await this.productLocators.continueShoppingButton.waitFor({ state: 'visible' });
+                await this.productLocators.continueShoppingButton.click();
+            }
+        }
     }
 }

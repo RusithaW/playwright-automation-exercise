@@ -39,6 +39,7 @@ export class ProductLocators {
     readonly categoryTitleHeader: Locator;
     readonly brandSidebar: Locator;
     readonly brandTitleHeader: Locator;
+    readonly productCards: Locator;
 
     constructor(page: Page) {
         this.page = page;
@@ -78,6 +79,7 @@ export class ProductLocators {
         this.categoryTitleHeader = page.locator('.features_items h2.title');
         this.brandSidebar = page.locator('.brands_products');
         this.brandTitleHeader = page.locator('.features_items h2.title');
+        this.productCards = page.locator('.features_items .col-sm-4');
     }
 
     /**

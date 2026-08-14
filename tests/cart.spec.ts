@@ -41,7 +41,7 @@ test.describe('Shopping Cart Flow Architecture Validation', () => {
         await expect(rowTwo.quantity).toHaveText('1');
     });
 
-    test('Test 17: Remove All Products Dynamically From Cart', async ({ page }) => {
+    test('Test Case 17: Remove All Products Dynamically From Cart', async ({ page }) => {
         await auth.navigateToHome();
         await page.waitForLoadState('networkidle');
 
