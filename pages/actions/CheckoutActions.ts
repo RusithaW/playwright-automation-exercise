@@ -56,4 +56,13 @@ export class CheckoutActions {
     async clickContinue() {
         await this.checkoutLocators.continueButton.click();
     }
+
+    async verifyDeliveryAndBillingAddress() {
+        await this.checkoutLocators.deliveryAddressBox.waitFor({ state: 'visible' });
+        await this.checkoutLocators.billingAddressBox.waitFor({ state: 'visible' });
+    }
+
+    async clickProceedToCheckout() {
+        await this.checkoutLocators.proceedToCheckoutButton.click();
+    }
 }

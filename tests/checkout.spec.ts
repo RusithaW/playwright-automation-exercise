@@ -219,4 +219,79 @@ test.describe('Transaction Flow', () => {
         await expect(checkoutActions.checkoutLocators.accountDeletedHeader).toHaveText('Account Deleted!');
         await checkoutActions.clickContinue();
     });
+
+    test('Test Case 23: Verify address details in checkout page', async ({ page }) => {
+        const timestamp = Date.now();
+        const userName = 'Rusitha Dilshan';
+        const userEmail = `testuser_${timestamp}@example.com`;
+        const userPassword = 'Password123!';
+
+        // Expected address values set by authActions.fillAccountDetailsForm()
+        const expectedAddressDetails = [
+            'John',
+            'Doe',
+            'QA Solutions',
+            '123 Automation St.',
+            'Floor 2',
+            'Los Angeles',
+            'California',
+            '90001',
+            'United States',
+            '1234567890'
+        ];
+
+        // 1-2. Launch browser & Navigate to url
+        await authActions.navigateToHome();
+
+        // 3. Verify that home page is visible successfully
+        await expect(authActions.authLocators.homeFeaturedItems).toBeVisible();
+
+        // 4. Click 'Signup / Login' button
+        await authActions.navigateToSignupLogin();
+
+        // 5. Fill all details in Signup and create account
+        await authActions.fillSignupForm(userName, userEmail);
+        await authActions.fillAccountDetailsForm(userPassword);
+
+        // 6. Verify 'ACCOUNT CREATED!' and click 'Continue' button
+        await expect(checkoutActions.checkoutLocators.accountCreatedHeader).toBeVisible();
+        await checkoutActions.clickContinue();
+
+        // 7. Verify ' Logged in as username' at top
+        await expect(checkoutActions.checkoutLocators.navbarContainer).toContainText(`Logged in as ${userName}`);
+
+        // 8. Add products to cart
+        await productActions.clickFirstProduct();
+        await productActions.addToCartFromDetailPage();
+
+        // 9. Click 'Cart' button
+        await expect(productActions.productLocators.viewCartModalLink).toBeVisible();
+        await productActions.productLocators.viewCartModalLink.click();
+
+        // 10. Verify that cart page is displayed
+        await page.waitForURL('**/view_cart'); // Lock: ensure cart page loaded
+        await expect(page.locator('li', { hasText: 'Shopping Cart' })).toHaveClass(/active/);
+
+        // 11. Click Proceed To Checkout
+        await checkoutActions.clickProceedToCheckout();
+        await page.waitForURL('**/checkout');
+
+        // 12. Verify that the delivery address is same address filled at the time registration of account
+        await checkoutActions.verifyDeliveryAndBillingAddress();
+        for (const detail of expectedAddressDetails) {
+            await expect(checkoutActions.checkoutLocators.deliveryAddressBox).toContainText(detail);
+        }
+
+        // 13. Verify that the billing address is same address filled at the time registration of account
+        for (const detail of expectedAddressDetails) {
+            await expect(checkoutActions.checkoutLocators.billingAddressBox).toContainText(detail);
+        }
+
+        // 14. Click 'Delete Account' button
+        await authActions.deleteAccount();
+
+        // 15. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+        await expect(checkoutActions.checkoutLocators.accountDeletedHeader).toBeVisible();
+        await checkoutActions.clickContinue();
+    });
 });

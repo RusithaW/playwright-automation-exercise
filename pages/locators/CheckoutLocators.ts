@@ -25,6 +25,10 @@ export class CheckoutLocators {
     readonly continueButton: Locator;
     readonly navbarContainer: Locator;
 
+    readonly deliveryAddressBox: Locator;
+    readonly billingAddressBox: Locator;
+    readonly proceedToCheckoutButton: Locator;
+
     constructor(page: Page) {
         this.page = page;
 
@@ -49,5 +53,10 @@ export class CheckoutLocators {
         this.accountDeletedHeader = page.locator('[data-qa="account-deleted"]');
         this.continueButton = page.locator('[data-qa="continue-button"]');
         this.navbarContainer = page.locator('header .navbar-nav');
+
+        // Address container boxes on checkout page
+        this.deliveryAddressBox = page.locator('#address_delivery');
+        this.billingAddressBox = page.locator('#address_invoice');
+        this.proceedToCheckoutButton = page.locator('.check_out');
     }
 }

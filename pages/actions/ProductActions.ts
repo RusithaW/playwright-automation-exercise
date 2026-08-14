@@ -18,6 +18,7 @@ export class ProductActions {
     // Opens the details sheet for the first product displayed in the active list
     async clickFirstProduct() {
         await this.productLocators.viewProductButton.click();
+        await this.page.waitForURL('**/product_details/**');
     }
 
     // Enters a search parameter and submits the query
@@ -49,6 +50,7 @@ export class ProductActions {
     }
 
     async addToCartFromDetailPage() {
+        await this.productLocators.addToCartDetailButton.waitFor({ state: 'visible' });
         await this.productLocators.addToCartDetailButton.click();
     }
 
