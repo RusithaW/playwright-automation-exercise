@@ -46,4 +46,26 @@ test.describe('Home Page Navigation and Test Cases', () => {
         const topBannerHeader = page.locator('h2:has-text("Full-Fledged practice website for Automation Engineers")').first();
         await expect(topBannerHeader).toBeVisible();
     });
+
+    test('Test Case 26: Verify Scroll Up without \'Arrow\' button and Scroll Down functionality', async ({ page }) => {
+        // 1-2. Launch browser & Navigate to url
+        await authActions.navigateToHome();
+
+        // 3. Verify that home page is visible successfully
+        await expect(authActions.authLocators.homeFeaturedItems).toBeVisible();
+
+        // 4. Scroll down page to bottom
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+
+        // 5. Verify 'SUBSCRIPTION' is visible
+        const subscriptionHeader = page.locator('h2', { hasText: 'Subscription' });
+        await expect(subscriptionHeader).toBeVisible();
+
+        // 6. Scroll up page to top (without clicking the arrow button)
+        await page.evaluate(() => window.scrollTo(0, 0));
+
+        // 7. Verify that page is scrolled up and 'Full-Fledged practice website for Automation Engineers' text is visible on screen
+        const topBannerHeader = page.locator('h2:has-text("Full-Fledged practice website for Automation Engineers")').first();
+        await expect(topBannerHeader).toBeVisible();
+    });
 });
