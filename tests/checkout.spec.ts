@@ -294,4 +294,91 @@ test.describe('Transaction Flow', () => {
         await expect(checkoutActions.checkoutLocators.accountDeletedHeader).toBeVisible();
         await checkoutActions.clickContinue();
     });
+
+    test('Test Case 24: Download Invoice after purchase order', async ({ page }) => {
+        const timestamp = Date.now();
+        const userName = 'Rusitha Dilshan';
+        const userEmail = `testuser_${timestamp}@example.com`;
+        const userPassword = 'Password123!';
+
+        // 1-2. Launch browser & Navigate to url
+        await authActions.navigateToHome();
+
+        // 3. Verify that home page is visible successfully
+        await expect(authActions.authLocators.homeFeaturedItems).toBeVisible();
+
+        // 4. Add products to cart
+        await productActions.clickFirstProduct();
+        await page.waitForURL('**/product_details/**');
+        await productActions.addToCartFromDetailPage();
+
+        // 5. Click 'Cart' button
+        await page.locator('#cartModal').waitFor({ state: 'visible' });
+        await productActions.productLocators.viewCartModalLink.click();
+
+        // 6. Verify that cart page is displayed
+        await page.waitForURL('**/view_cart');
+        await expect(page.locator('li', { hasText: 'Shopping Cart' })).toHaveClass(/active/);
+
+        // 7. Click Proceed To Checkout
+        await cartActions.clickProceedToCheckout();
+
+        // 8. Click 'Register / Login' button on the checkout modal
+        await page.locator('#checkoutModal a[href="/login"]').click();
+
+        // 9-10. Fill all details in Signup and create account
+        await authActions.fillSignupForm(userName, userEmail);
+        await authActions.fillAccountDetailsForm(userPassword);
+        await expect(checkoutActions.checkoutLocators.accountCreatedHeader).toBeVisible();
+        await checkoutActions.clickContinue();
+
+        // 11. Verify 'Logged in as username' at top
+        await expect(checkoutActions.checkoutLocators.navbarContainer).toContainText(`Logged in as ${userName}`);
+
+        // 12. Click 'Cart' button
+        await cartActions.cartLocators.navbarCartLink.click();
+        await page.waitForURL('**/view_cart');
+
+        // 13. Click 'Proceed To Checkout' button
+        await cartActions.clickProceedToCheckout();
+        await page.waitForURL('**/checkout');
+
+        // 14. Verify Address Details and Review Your Order
+        await checkoutActions.verifyDeliveryAndBillingAddress();
+
+        // 15. Enter description in comment text area and click 'Place Order'
+        await page.locator('textarea[name="message"]').fill('Order comment: Handle with care.');
+        await page.locator('a[href="/payment"]').click();
+
+        // 16. Enter payment details
+        await page.locator('input[name="name_on_card"]').fill('Rusitha Dilshan');
+        await page.locator('input[name="card_number"]').fill('4111111111111111');
+        await page.locator('input[name="cvc"]').fill('311');
+        await page.locator('input[name="expiry_month"]').fill('12');
+        await page.locator('input[name="expiry_year"]').fill('2028');
+
+        // 17. Click 'Pay and Confirm Order' button
+        await page.locator('button#submit').click();
+
+        // 18. Verify success message 'Your order has been placed successfully!'
+        await expect(page.locator('[data-qa="order-placed"]')).toBeVisible();
+
+        // 19. Click 'Download Invoice' button and verify invoice is downloaded successfully
+        const downloadPromise = page.waitForEvent('download');
+        await page.locator('a:has-text("Download Invoice")').click();
+        const download = await downloadPromise;
+
+        // Assert that the file downloaded and has a non-empty file name
+        expect(download.suggestedFilename()).toBeTruthy();
+
+        // 20. Click 'Continue' button
+        await page.locator('[data-qa="continue-button"]').click();
+
+        // 21. Click 'Delete Account' button
+        await authActions.deleteAccount();
+
+        // 22. Verify 'ACCOUNT DELETED!' and click 'Continue' button
+        await expect(checkoutActions.checkoutLocators.accountDeletedHeader).toBeVisible();
+        await checkoutActions.clickContinue();
+    });
 });
