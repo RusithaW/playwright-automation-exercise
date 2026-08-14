@@ -68,7 +68,7 @@ export class ProductLocators {
         this.productInfoContainer = page.locator('.product-information');
         this.productName = this.productInfoContainer.locator('h2');
         this.productCategory = this.productInfoContainer.getByText('Category:');
-        this.productPrice = this.productInfoContainer.locator('span', { hasText: /Rs\./ });
+        this.productPrice = page.locator('.product-information span').filter({ hasText: /Rs\./ }).last();
         this.productAvailability = this.productInfoContainer.getByText('Availability:');
         this.productCondition = this.productInfoContainer.getByText('Condition:');
         this.productBrand = this.productInfoContainer.getByText('Brand:');

@@ -27,13 +27,34 @@ export class ProductActions {
         await this.productLocators.searchButton.click();
     }
 
-    // [TC12 Addition]: Sequences multi-layered overlays without letting thread executions collide
+    // [TC12 / TC14]: Sequences multi-layered overlays without letting thread executions collide
     async addTwoProductsSequential() {
-        await this.productLocators.firstProductCard.locator('.add-to-cart').first().click();
-        await this.productLocators.continueShoppingButton.waitFor({ state: 'visible' });
+        // --- Product 1 ---
+        await this.productLocators.firstProductCard.scrollIntoViewIfNeeded();
+        await this.productLocators.firstProductCard.hover();
+
+        // Wait explicitly for the hover overlay button to become visible before clicking
+        const firstOverlayBtn = this.productLocators.firstProductCard.locator('.overlay-content .add-to-cart');
+        await firstOverlayBtn.waitFor({ state: 'visible' });
+        await firstOverlayBtn.click();
+
+        // Wait for modal container to become visible
+        await this.page.locator('#cartModal').waitFor({ state: 'visible' });
         await this.productLocators.continueShoppingButton.click();
-        await this.productLocators.secondProductCard.locator('.add-to-cart').first().click();
-        await this.productLocators.viewCartModalLink.waitFor({ state: 'visible' });
+
+        // Wait for modal backdrop to be completely hidden before interacting with product 2
+        await this.page.locator('#cartModal').waitFor({ state: 'hidden' });
+
+        // --- Product 2 ---
+        await this.productLocators.secondProductCard.scrollIntoViewIfNeeded();
+        await this.productLocators.secondProductCard.hover();
+
+        const secondOverlayBtn = this.productLocators.secondProductCard.locator('.overlay-content .add-to-cart');
+        await secondOverlayBtn.waitFor({ state: 'visible' });
+        await secondOverlayBtn.click();
+
+        // Wait for modal and click 'View Cart'
+        await this.page.locator('#cartModal').waitFor({ state: 'visible' });
         await this.productLocators.viewCartModalLink.click();
     }
 
@@ -60,14 +81,16 @@ export class ProductActions {
         for (let i = 0; i < count; i++) {
             const productCard = this.productLocators.productCards.nth(i);
 
-            // Fixed: Appended .first() to isolate the primary layout button and dodge the hover copy elements
-            const addToCartButton = productCard.locator('.add-to-cart').first();
             await productCard.scrollIntoViewIfNeeded();
-            if (await addToCartButton.isVisible()) {
-                await addToCartButton.click();
-                await this.productLocators.continueShoppingButton.waitFor({ state: 'visible' });
-                await this.productLocators.continueShoppingButton.click();
-            }
+            await productCard.hover();
+
+            const overlayBtn = productCard.locator('.overlay-content .add-to-cart');
+            await overlayBtn.waitFor({ state: 'visible' });
+            await overlayBtn.click();
+
+            await this.page.locator('#cartModal').waitFor({ state: 'visible' });
+            await this.productLocators.continueShoppingButton.click();
+            await this.page.locator('#cartModal').waitFor({ state: 'hidden' });
         }
     }
 }

@@ -3,34 +3,29 @@ import { AuthActions } from '../pages/actions/AuthActions';
 import { ProductActions } from '../pages/actions/ProductActions';
 import { CartActions } from '../pages/actions/CartActions';
 
-
 test.describe('Shopping Cart Flow Architecture Validation', () => {
-    let auth: AuthActions;
-    let product: ProductActions;
-    let cart: CartActions;
+    let authActions: AuthActions;
+    let productActions: ProductActions;
+    let cartActions: CartActions;
 
     test.beforeEach(async ({ page }) => {
-        auth = new AuthActions(page);
-        product = new ProductActions(page);
-        cart = new CartActions(page);
+        authActions = new AuthActions(page);
+        productActions = new ProductActions(page);
+        cartActions = new CartActions(page);
     });
 
-    test('Test Case 12: Add Products in Cart', async ({ page }) => {
-        // 1. Initialize Action Classes
-        const product = new ProductActions(page);
-        const cart = new CartActions(page);
+    test('Test Case 12: Add Products in Cart', async () => {
+        // 1. Navigate and add products using initialized page objects
+        await authActions.navigateToHome();
+        await productActions.navigateToProducts();
+        await productActions.addTwoProductsSequential();
 
-        // 2. Execute steps
-        await page.goto('/'); // Equivalent to auth.navigateToHome() if not using fixtures
-        await product.navigateToProducts();
-        await product.addTwoProductsSequential();
+        // 2. Assertions
+        await expect(cartActions.cartLocators.cartBreadcrumb).toBeVisible();
+        await expect(cartActions.cartLocators.cartRows).toHaveCount(2);
 
-        // 3. Assertions
-        await expect(cart.cartLocators.cartBreadcrumb).toBeVisible();
-        await expect(cart.cartLocators.cartRows).toHaveCount(2);
-
-        const rowOne = cart.cartLocators.getCartItemRowDetails(0);
-        const rowTwo = cart.cartLocators.getCartItemRowDetails(1);
+        const rowOne = cartActions.cartLocators.getCartItemRowDetails(0);
+        const rowTwo = cartActions.cartLocators.getCartItemRowDetails(1);
 
         await expect(rowOne.name).toBeVisible();
         await expect(rowOne.price).toBeVisible();
@@ -42,30 +37,36 @@ test.describe('Shopping Cart Flow Architecture Validation', () => {
     });
 
     test('Test Case 17: Remove All Products Dynamically From Cart', async ({ page }) => {
-        await auth.navigateToHome();
-        await page.waitForLoadState('networkidle');
+        // 1. Setup: Navigate and populate cart with products
+        await authActions.navigateToHome();
+        await productActions.navigateToProducts();
+        await productActions.addTwoProductsSequential();
 
-        // 1. Add items and view the cart
-        await product.addTwoProductsSequential();
-        await cart.navigateToCart();
+        // 2. Ensure cart table rows are loaded and visible
+        await cartActions.cartLocators.cartRows.first().waitFor({ state: 'visible' });
 
-        // 2. Clear the cart dynamically by driving down the live item count
-        let initialCount = await cart.cartLocators.cartRows.count();
+        // 3. Dynamically loop through remaining rows and delete each item
+        while ((await cartActions.cartLocators.cartRows.count()) > 0) {
+            const targetRow = cartActions.cartLocators.cartRows.first();
+            const rowId = await targetRow.getAttribute('id');
 
-        while (initialCount > 0) {
-            // Always target the delete button inside the first active row
-            const firstDeleteButton = cart.cartLocators.cartRows.first().locator('.cart_quantity_delete');
-            await firstDeleteButton.click();
+            // Retry click until jQuery fires and the DOM element is detached
+            await expect(async () => {
+                await targetRow.locator('.cart_quantity_delete').click();
 
-            // FIX: Instead of waiting for element detachment, expect the live row count to drop by 1
-            await expect(cart.cartLocators.cartRows).toHaveCount(initialCount - 1);
-
-            // Update the control counter to match the new live state
-            initialCount = await cart.cartLocators.cartRows.count();
+                if (rowId) {
+                    // ✨ FIX: Playwright uses .not.toBeAttached() to verify detachment
+                    await expect(page.locator(`#${rowId}`)).not.toBeAttached({ timeout: 3000 });
+                } else {
+                    await expect(cartActions.cartLocators.cartRows).toHaveCount(
+                        (await cartActions.cartLocators.cartRows.count()) - 1,
+                        { timeout: 3000 }
+                    );
+                }
+            }).toPass({ timeout: 15000 });
         }
 
-        // 3. Final Assertions: Verify everything is completely cleared
-        await expect(cart.cartLocators.cartRows).toHaveCount(0);
+        // 4. Verify empty cart container is displayed
         await expect(page.locator('#empty_cart')).toBeVisible();
     });
-});  
+});
