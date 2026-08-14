@@ -49,6 +49,15 @@ export class ProductLocators {
     readonly brandTitleHeader: Locator;
     readonly productCards: Locator;
 
+    // Navigation elements
+    readonly productsNavLink: Locator;
+
+    // Category and panel locators
+    readonly womenCategoryPanel: Locator;
+    readonly menCategoryPanel: Locator;
+    readonly cartItemsTableRows: Locator;
+    readonly searchedProductsTitle: Locator;
+
     constructor(page: Page) {
         this.page = page;
 
@@ -96,6 +105,15 @@ export class ProductLocators {
         this.brandSidebar = page.locator('.brands_products');
         this.brandTitleHeader = page.locator('.features_items h2.title');
         this.productCards = page.locator('.features_items .col-sm-4');
+
+        // Navigation elements
+        this.productsNavLink = page.getByRole('link', { name: ' Products' });
+
+        // Category and panel locators
+        this.womenCategoryPanel = page.locator('#Women');
+        this.menCategoryPanel = page.locator('#Men');
+        this.cartItemsTableRows = page.locator('#cart_info_table tbody tr');
+        this.searchedProductsTitle = page.locator('.title.text-center');
     }
 
     /**

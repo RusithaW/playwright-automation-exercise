@@ -75,4 +75,49 @@ export class AuthActions {
     async deleteAccount() {
         await this.authLocators.deleteAccountLink.click();
     }
+
+    // Handles clicking the continue button after account creation/deletion
+    async clickContinueButton() {
+        await this.authLocators.continueButton.click();
+    }
+
+    // Returns the signup form header locator for assertions
+    getSignupHeader() {
+        return this.authLocators.signupHeader;
+    }
+
+    // Returns the login form header locator for assertions
+    getLoginHeader() {
+        return this.authLocators.loginHeader;
+    }
+
+    // Returns the account info header locator for assertions
+    getAccountInfoHeader() {
+        return this.authLocators.accountInfoHeader;
+    }
+
+    // Returns the account created header locator for assertions
+    getAccountCreatedHeader() {
+        return this.authLocators.accountCreatedHeader;
+    }
+
+    // Returns the account deleted header locator for assertions
+    getAccountDeletedHeader() {
+        return this.authLocators.accountDeletedHeader;
+    }
+
+    // Returns the navbar container locator for assertions
+    getNavbarContainer() {
+        return this.authLocators.navbarContainer;
+    }
+
+    // Returns the signup error message locator for assertions
+    getSignupErrorMessage() {
+        return this.authLocators.signupErrorMessage;
+    }
+
+    // Returns the login error message locator for assertions
+    getLoginErrorMessage() {
+        return this.authLocators.loginErrorMessage;
+    }
 }

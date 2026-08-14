@@ -65,4 +65,36 @@ export class CheckoutActions {
     async clickProceedToCheckout() {
         await this.checkoutLocators.proceedToCheckoutButton.click();
     }
+
+    // Wait for cart modal to become visible
+    async waitForCartModalVisible() {
+        await this.checkoutLocators.cartModal.waitFor({ state: 'visible' });
+    }
+
+    // Wait for cart modal to be hidden
+    async waitForCartModalHidden() {
+        await this.checkoutLocators.cartModal.waitFor({ state: 'hidden' });
+    }
+
+    // Click the login link from checkout modal
+    async clickLoginFromCheckoutModal() {
+        await this.checkoutLocators.checkoutModal.locator('a[href="/login"]').click();
+    }
+
+    // Verify shopping cart breadcrumb is active
+    async verifyShoppingCartBreadcrumbActive() {
+        await this.checkoutLocators.shoppingCartBreadcrumb.waitFor({ state: 'visible' });
+    }
+
+    // Verify order placed successfully
+    async verifyOrderPlaced() {
+        await this.checkoutLocators.orderPlacedAlert.waitFor({ state: 'visible' });
+    }
+
+    // Download invoice
+    async downloadInvoice() {
+        const downloadPromise = this.page.waitForEvent('download');
+        await this.checkoutLocators.downloadInvoiceLink.click();
+        return downloadPromise;
+    }
 }

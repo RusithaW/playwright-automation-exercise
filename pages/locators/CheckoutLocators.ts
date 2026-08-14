@@ -29,6 +29,13 @@ export class CheckoutLocators {
     readonly billingAddressBox: Locator;
     readonly proceedToCheckoutButton: Locator;
 
+    // Additional modal and state locators
+    readonly cartModal: Locator;
+    readonly checkoutModal: Locator;
+    readonly shoppingCartBreadcrumb: Locator;
+    readonly orderPlacedAlert: Locator;
+    readonly downloadInvoiceLink: Locator;
+
     constructor(page: Page) {
         this.page = page;
 
@@ -58,5 +65,12 @@ export class CheckoutLocators {
         this.deliveryAddressBox = page.locator('#address_delivery');
         this.billingAddressBox = page.locator('#address_invoice');
         this.proceedToCheckoutButton = page.locator('.check_out');
+
+        // Additional modal and state locators
+        this.cartModal = page.locator('#cartModal');
+        this.checkoutModal = page.locator('#checkoutModal');
+        this.shoppingCartBreadcrumb = page.locator('li', { hasText: 'Shopping Cart' });
+        this.orderPlacedAlert = page.locator('[data-qa="order-placed"]');
+        this.downloadInvoiceLink = page.locator('a:has-text("Download Invoice")');
     }
 }

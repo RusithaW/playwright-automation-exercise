@@ -7,7 +7,8 @@
     "test": "npx playwright test",
     "test:ui": "npx playwright test --ui",
     "test:chromium": "npx playwright test --project=chromium",
-    "report": "npx playwright show-report"
+    "report": "npx playwright show-report",
+    "lint": "tsc --noEmit --noUnusedLocals --noUnusedParameters"
   },
   "keywords": [
     "playwright",
@@ -23,7 +24,8 @@
   "devDependencies": {
     "@playwright/test": "^1.61.0",
     "@types/node": "^26.0.0",
-    "dotenv": "^17.4.2"
+    "dotenv": "^17.4.2",
+    "typescript": "^7.0.2"
   },
   "allowScripts": {
     "fsevents@2.3.2": true

@@ -160,7 +160,7 @@ test.describe('Transaction Flow', () => {
         await authActions.navigateToSignupLogin();
         await authActions.fillSignupForm(username, dynamicEmail);
         await authActions.fillAccountDetailsForm(commonPassword);
-        await page.locator('[data-qa="continue-button"]').click();
+        await authActions.clickContinueButton();
         await authActions.logout(); // Account is ready, log out to satisfy step 4
 
         // 1-2. Launch browser & Navigate to url
@@ -270,7 +270,7 @@ test.describe('Transaction Flow', () => {
 
         // 10. Verify that cart page is displayed
         await page.waitForURL('**/view_cart'); // Lock: ensure cart page loaded
-        await expect(page.locator('li', { hasText: 'Shopping Cart' })).toHaveClass(/active/);
+        await expect(checkoutActions.checkoutLocators.shoppingCartBreadcrumb).toHaveClass(/active/);
 
         // 11. Click Proceed To Checkout
         await checkoutActions.clickProceedToCheckout();
@@ -313,18 +313,18 @@ test.describe('Transaction Flow', () => {
         await productActions.addToCartFromDetailPage();
 
         // 5. Click 'Cart' button
-        await page.locator('#cartModal').waitFor({ state: 'visible' });
+        await checkoutActions.waitForCartModalVisible();
         await productActions.productLocators.viewCartModalLink.click();
 
         // 6. Verify that cart page is displayed
         await page.waitForURL('**/view_cart');
-        await expect(page.locator('li', { hasText: 'Shopping Cart' })).toHaveClass(/active/);
+        await expect(checkoutActions.checkoutLocators.shoppingCartBreadcrumb).toHaveClass(/active/);
 
         // 7. Click Proceed To Checkout
         await cartActions.clickProceedToCheckout();
 
         // 8. Click 'Register / Login' button on the checkout modal
-        await page.locator('#checkoutModal a[href="/login"]').click();
+        await checkoutActions.clickLoginFromCheckoutModal();
 
         // 9-10. Fill all details in Signup and create account
         await authActions.fillSignupForm(userName, userEmail);
@@ -347,32 +347,26 @@ test.describe('Transaction Flow', () => {
         await checkoutActions.verifyDeliveryAndBillingAddress();
 
         // 15. Enter description in comment text area and click 'Place Order'
-        await page.locator('textarea[name="message"]').fill('Order comment: Handle with care.');
-        await page.locator('a[href="/payment"]').click();
+        await checkoutActions.fillOrderCommentAndPlaceOrder('Order comment: Handle with care.');
+        await page.waitForURL('**/payment');
 
         // 16. Enter payment details
-        await page.locator('input[name="name_on_card"]').fill('Rusitha Dilshan');
-        await page.locator('input[name="card_number"]').fill('4111111111111111');
-        await page.locator('input[name="cvc"]').fill('311');
-        await page.locator('input[name="expiry_month"]').fill('12');
-        await page.locator('input[name="expiry_year"]').fill('2028');
+        await checkoutActions.fillPaymentDetails('Rusitha Dilshan', '4111111111111111', '311', '12', '2028');
 
         // 17. Click 'Pay and Confirm Order' button
-        await page.locator('button#submit').click();
+        await checkoutActions.submitPayment();
 
         // 18. Verify success message 'Your order has been placed successfully!'
-        await expect(page.locator('[data-qa="order-placed"]')).toBeVisible();
+        await expect(checkoutActions.checkoutLocators.orderPlacedAlert).toBeVisible();
 
         // 19. Click 'Download Invoice' button and verify invoice is downloaded successfully
-        const downloadPromise = page.waitForEvent('download');
-        await page.locator('a:has-text("Download Invoice")').click();
-        const download = await downloadPromise;
+        const download = await checkoutActions.downloadInvoice();
 
         // Assert that the file downloaded and has a non-empty file name
         expect(download.suggestedFilename()).toBeTruthy();
 
         // 20. Click 'Continue' button
-        await page.locator('[data-qa="continue-button"]').click();
+        await checkoutActions.clickContinue();
 
         // 21. Click 'Delete Account' button
         await authActions.deleteAccount();

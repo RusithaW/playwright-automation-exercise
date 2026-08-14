@@ -15,7 +15,7 @@ test.describe('Newsletter Subscription Validations', () => {
         cartActions = new CartActions(page);
     });
 
-    test('Test Case 10: Verify Subscription in home page footer', async ({ page }) => {
+    test('Test Case 10: Verify Subscription in home page footer', async () => {
         // Navigate to the application landing page and verify visibility
         await authActions.navigateToHome();
         await expect(authActions.authLocators.homeFeaturedItems).toBeVisible();

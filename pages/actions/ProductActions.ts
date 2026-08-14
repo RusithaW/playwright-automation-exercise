@@ -15,6 +15,11 @@ export class ProductActions {
         await this.page.goto('/products');
     }
 
+    // Navigates to products page via the header navigation link
+    async navigateToProductsViaHeaderLink() {
+        await this.productLocators.productsNavLink.click();
+    }
+
     // Opens the details sheet for the first product displayed in the active list
     async clickFirstProduct() {
         await this.productLocators.viewProductButton.click();

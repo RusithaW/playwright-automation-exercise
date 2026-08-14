@@ -8,6 +8,7 @@ export class CartLocators {
     readonly cartBreadcrumb: Locator;
     readonly cartRows: Locator;
     readonly cartDeleteButtons: Locator;
+    readonly cartQuantityButton: Locator;
 
     readonly proceedToCheckoutButton: Locator;
 
@@ -16,6 +17,7 @@ export class CartLocators {
         this.navbarCartLink = page.locator('header .navbar-nav a[href="/view_cart"]');
         this.cartBreadcrumb = page.locator('.breadcrumb .active:has-text("Shopping Cart")');
         this.cartRows = page.locator('table#cart_info_table tbody tr');
+        this.cartQuantityButton = page.locator('#cart_info_table .disabled');
         this.proceedToCheckoutButton = page.locator('a.btn.btn-default.check_out');
         this.cartDeleteButtons = page.locator('a.cart_quantity_delete');
     }

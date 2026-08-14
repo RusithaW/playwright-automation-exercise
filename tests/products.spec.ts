@@ -91,8 +91,7 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await expect(page).toHaveURL(/.*view_cart.*/);
 
         // 9. Verify that product is displayed in cart page with exact quantity
-        const cartQuantityButton = page.locator('#cart_info_table .disabled');
-        await expect(cartQuantityButton).toHaveText(targetQuantity);
+        await expect(cartActions.cartLocators.cartQuantityButton).toHaveText(targetQuantity);
     });
 
     test('Test Case 18: View Category Products', async ({ page }) => {
@@ -109,8 +108,7 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await productActions.productLocators.getCategoryGroupHeader('Women').click();
 
         // Verify the container successfully toggled open by checking for the Bootstrap 'in' style class
-        const womenPanel = page.locator('#Women');
-        await expect(womenPanel).toHaveClass(/collapse in|collapsing/);
+        await expect(productActions.productLocators.womenCategoryPanel).toHaveClass(/collapse in|collapsing/);
 
         // 5. Click on 'Dress' sub-category link under 'Women' category
         const dressLink = productActions.productLocators.getCategorySubLink('Women', 'Dress');
@@ -127,8 +125,7 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await productActions.productLocators.getCategoryGroupHeader('Men').click();
 
         // Verify the men's container toggled open successfully
-        const menPanel = page.locator('#Men');
-        await expect(menPanel).toHaveClass(/collapse in|collapsing/);
+        await expect(productActions.productLocators.menCategoryPanel).toHaveClass(/collapse in|collapsing/);
 
         const tshirtsLink = productActions.productLocators.getCategorySubLink('Men', 'Tshirts');
         await tshirtsLink.click();
@@ -143,8 +140,7 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await authActions.navigateToHome();
 
         // 3. Click on 'Products' button
-        // Assuming your 'productActions' POM instance has a navigation handler or header navigation
-        await page.getByRole('link', { name: ' Products' }).click();
+        await productActions.navigateToProductsViaHeaderLink();
 
         // 4. Verify that Brands are visible on left side bar
         await expect(productActions.productLocators.brandSidebar).toBeVisible();
@@ -188,7 +184,7 @@ test.describe('Products Page Navigation and Search Validations', () => {
         // 5-6. Enter product name in search input and click search button
         const searchTerm = 'dress';
         await productActions.searchProduct(searchTerm);
-        await expect(page.locator('.title.text-center')).toContainText('Searched Products');
+        await expect(productActions.productLocators.searchedProductsTitle).toContainText('Searched Products');
 
         // 7-8. Verify products related to search are visible and add all to cart
         await productActions.addAllVisibleProductsToCart();
@@ -197,7 +193,7 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await cartActions.cartLocators.navbarCartLink.click();
         await page.waitForURL('**/view_cart');
 
-        const preLoginCartItemsRow = page.locator('#cart_info_table tbody tr');
+        const preLoginCartItemsRow = productActions.productLocators.cartItemsTableRows;
         const totalItemsCount = await preLoginCartItemsRow.count();
         expect(totalItemsCount).toBeGreaterThan(0);
 
@@ -210,7 +206,7 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await page.waitForURL('**/view_cart');
 
         // 12. Verify that those exact products are visible in cart after login
-        const postLoginCartItemsRow = page.locator('#cart_info_table tbody tr');
+        const postLoginCartItemsRow = productActions.productLocators.cartItemsTableRows;
         await expect(postLoginCartItemsRow).toHaveCount(totalItemsCount);
 
         // Cleanup: Delete created account

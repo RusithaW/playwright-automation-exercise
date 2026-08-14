@@ -43,6 +43,17 @@ export class AuthLocators {
     // Create Account Button
     readonly createAccountButton: Locator;
 
+    // Form Headers & Status Messages
+    readonly signupHeader: Locator;
+    readonly loginHeader: Locator;
+    readonly accountInfoHeader: Locator;
+    readonly accountCreatedHeader: Locator;
+    readonly accountDeletedHeader: Locator;
+    readonly continueButton: Locator;
+    readonly navbarContainer: Locator;
+    readonly signupErrorMessage: Locator;
+    readonly loginErrorMessage: Locator;
+
     constructor(page: Page) {
         this.page = page;
 
@@ -85,5 +96,16 @@ export class AuthLocators {
 
         // Create Account Button
         this.createAccountButton = page.locator('button[data-qa="create-account"]');
+
+        // Form Headers & Status Messages
+        this.signupHeader = page.locator('.signup-form h2');
+        this.loginHeader = page.locator('.login-form h2');
+        this.accountInfoHeader = page.locator('.login-form h2').first();
+        this.accountCreatedHeader = page.locator('[data-qa="account-created"]');
+        this.accountDeletedHeader = page.locator('[data-qa="account-deleted"]');
+        this.continueButton = page.locator('[data-qa="continue-button"]');
+        this.navbarContainer = page.locator('header .navbar-nav');
+        this.signupErrorMessage = page.locator('.signup-form form p');
+        this.loginErrorMessage = page.locator('.login-form form p');
     }
 }
