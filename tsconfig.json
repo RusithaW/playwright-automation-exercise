@@ -16,7 +16,8 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "types": [
-            "node"
+            "node",
+            "@playwright/test"
         ]
     },
     "include": [

@@ -22,15 +22,19 @@ export default defineConfig({
   reporter: 'html',
 
   /* Unified Timeouts */
-  timeout: 60000,          // 60 seconds total test limit (gives slow server room to breathe)
+  timeout: 60000,          // 60 seconds total test limit
   expect: {
-    timeout: 10000,        // 10 seconds for UI elements to assert visible
+    timeout: 10000,        // 10 seconds for UI element assertions
   },
 
-  /* Shared settings for all the projects below. */
+  /* Shared settings for all projects below */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
+    /* Base URL to use in actions like `await page.goto('/')` */
     baseURL: process.env.BASE_URL || 'https://automationexercise.com',
+
+    /* Configures getByTestId() to query data-qa attributes used by automationexercise.com */
+    testIdAttribute: 'data-qa',
+
     trace: 'on-first-retry',
     actionTimeout: 15000,     // 15 seconds limit per click/fill action
     navigationTimeout: 30000,  // 30 seconds limit for initial page loading
