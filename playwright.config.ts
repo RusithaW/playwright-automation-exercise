@@ -8,6 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export default defineConfig({
   testDir: './tests',
+  /* Test match patterns for UI and API tests */
+  testMatch: ['**/*.spec.ts', '**/*.api.spec.ts'],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -39,11 +41,22 @@ export default defineConfig({
     },
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for major browsers and API tests */
   projects: [
+    // UI Tests
     {
-      name: 'chromium',
+      name: 'chromium-ui',
       use: { ...devices['Desktop Chrome'] },
+      testMatch: 'tests/**/*.spec.ts',
+      testIgnore: 'tests/api/**/*.api.spec.ts',
+    },
+
+    // API Tests (no browser needed)
+    {
+      name: 'api',
+      use: {},
+      testMatch: 'tests/api/**/*.api.spec.ts',
+      timeout: 30000,
     },
   ],
 });

@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "npx playwright test",
-    "test:ui": "npx playwright test --ui",
-    "test:chromium": "npx playwright test --project=chromium",
+    "test:ui": "npx playwright test --project=chromium-ui",
+    "test:api": "npx playwright test --project=api",
+    "test:all": "npx playwright test",
+    "test:chromium": "npx playwright test --project=chromium-ui",
+    "test:headed": "npx playwright test --headed",
     "report": "npx playwright show-report",
     "lint": "tsc --noEmit --noUnusedLocals --noUnusedParameters"
   },
