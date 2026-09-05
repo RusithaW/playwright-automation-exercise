@@ -11,6 +11,7 @@ test.describe('Product API Suite (API 1, 2, 5, 6)', () => {
     test('API 1: Get All Products List', async () => {
         const response = await productService.getAllProducts();
         expect(response.status()).toBe(200);
+
         const body = await response.json();
         expect(body.responseCode).toBe(200);
         expect(Array.isArray(body.products)).toBe(true);
