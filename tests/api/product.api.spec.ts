@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { ProductService } from '../../pages/api/services/ProductService';
+import { apiTest as test, expect } from '../../fixtures/apiFixtures';
+import { ProductService } from '../../api/services/ProductService';
 
 test.describe('Product API Suite (API 1, 2, 5, 6)', () => {
     let productService: ProductService;
@@ -20,10 +20,10 @@ test.describe('Product API Suite (API 1, 2, 5, 6)', () => {
 
     test('API 2: Attempt POST to products list (Unsupported Method)', async () => {
         const response = await productService.attemptPostToProductsList();
-        expect(response.status()).toBe(200); // Network HTTP status is always 200
+        expect(response.status()).toBe(200);
 
         const body = await response.json();
-        expect(body.responseCode).toBe(405); // API payload code
+        expect(body.responseCode).toBe(405);
         expect(body.message).toBe('This request method is not supported.');
     });
 
@@ -37,7 +37,7 @@ test.describe('Product API Suite (API 1, 2, 5, 6)', () => {
     });
 
     test('API 6: POST To Search Product without search_product parameter', async () => {
-        const response = await productService.searchProducts(); // No param passed
+        const response = await productService.searchProducts();
         const body = await response.json();
 
         expect(body.responseCode).toBe(400);

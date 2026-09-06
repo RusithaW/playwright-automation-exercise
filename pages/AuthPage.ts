@@ -1,5 +1,8 @@
 import { Page, Locator } from '@playwright/test';
 
+/**
+ * Interface representing account registration details for form submission.
+ */
 export interface AccountDetails {
     password?: string;
     day?: string;
@@ -17,68 +20,119 @@ export interface AccountDetails {
     mobileNumber?: string;
 }
 
+/**
+ * AuthPage Class
+ * Page Object representing the Signup, Login, and Account Registration pages.
+ * Encapsulates authentication forms, registration fields, and status headers.
+ */
 export class AuthPage {
-    readonly page: Page;
+    private readonly page: Page;
 
-    // Navigation & General Locators
-    readonly homeFeaturedItems: Locator;
-    readonly signupLoginLink: Locator;
-    readonly logoutLink: Locator;
-    readonly deleteAccountLink: Locator;
-    readonly continueButton: Locator;
-    readonly loggedInAsUser: Locator;
-
-    // Headers & Messages
+    /** Locator for the 'New User Signup!' header */
     readonly signupHeader: Locator;
+
+    /** Locator for the 'Login to your account' header */
     readonly loginHeader: Locator;
+
+    /** Locator for the 'Enter Account Information' registration header */
     readonly accountInfoHeader: Locator;
+
+    /** Locator for the 'ACCOUNT CREATED!' success banner */
     readonly accountCreatedHeader: Locator;
+
+    /** Locator for the 'ACCOUNT DELETED!' success banner */
     readonly accountDeletedHeader: Locator;
+
+    /** Locator for duplicate email registration error alert */
     readonly signupErrorMessage: Locator;
+
+    /** Locator for invalid credentials login error alert */
     readonly loginErrorMessage: Locator;
 
-    // Login Form Locators
+    /** Locator for the login email input field */
     readonly loginEmailInput: Locator;
+
+    /** Locator for the login password input field */
     readonly loginPasswordInput: Locator;
+
+    /** Locator for the login submission button */
     readonly loginButton: Locator;
 
-    // Signup Form Locators
+    /** Locator for the initial signup name input field */
     readonly signupNameInput: Locator;
+
+    /** Locator for the initial signup email input field */
     readonly signupEmailInput: Locator;
+
+    /** Locator for the initial signup submission button */
     readonly signupButton: Locator;
 
-    // Account Registration Details Form Locators
+    /** Radio button locator for Title 'Mr' selection */
     readonly genderTitleMr: Locator;
+
+    /** Locator for the registration password field */
     readonly passwordInput: Locator;
+
+    /** Dropdown locator for birth day selection */
     readonly daysSelect: Locator;
+
+    /** Dropdown locator for birth month selection */
     readonly monthsSelect: Locator;
+
+    /** Dropdown locator for birth year selection */
     readonly yearsSelect: Locator;
+
+    /** Checkbox locator for newsletter subscription */
     readonly newsletterCheckbox: Locator;
+
+    /** Checkbox locator for special offers from partners */
     readonly partnersCheckbox: Locator;
+
+    /** Locator for the first name input field */
     readonly firstNameInput: Locator;
+
+    /** Locator for the last name input field */
     readonly lastNameInput: Locator;
+
+    /** Locator for the company name input field */
     readonly companyInput: Locator;
+
+    /** Locator for primary street address input field */
     readonly addressInput: Locator;
+
+    /** Locator for secondary address input field */
     readonly address2Input: Locator;
+
+    /** Dropdown locator for country selection */
     readonly countrySelect: Locator;
+
+    /** Locator for state input field */
     readonly stateInput: Locator;
+
+    /** Locator for city input field */
     readonly cityInput: Locator;
+
+    /** Locator for zipcode/postal code input field */
     readonly zipcodeInput: Locator;
+
+    /** Locator for mobile phone number input field */
     readonly mobileNumberInput: Locator;
+
+    /** Locator for 'Create Account' submission button */
     readonly createAccountButton: Locator;
 
+    /** Locator for post-action 'Continue' button */
+    readonly continueButton: Locator;
+
+    /**
+     * Initializes locators for authentication and registration forms.
+     * 
+     * @param page - Active Playwright Page instance.
+     */
     constructor(page: Page) {
         this.page = page;
 
-        // General Navigation Locators
-        this.homeFeaturedItems = page.locator('.features_items');
-        this.signupLoginLink = page.getByRole('link', { name: 'Signup / Login' });
-        this.logoutLink = page.getByRole('link', { name: 'Logout' });
-        this.deleteAccountLink = page.getByRole('link', { name: 'Delete Account' });
-        this.continueButton = page.getByTestId('continue-button');
-        this.loggedInAsUser = page.getByText(/Logged in as/i);
-
-        // Header & Alert Locators
+        // Headers & Alerts
         this.signupHeader = page.getByRole('heading', { name: 'New User Signup!' });
         this.loginHeader = page.getByRole('heading', { name: 'Login to your account' });
         this.accountInfoHeader = page.getByRole('heading', { name: 'Enter Account Information' });
@@ -97,14 +151,14 @@ export class AuthPage {
         this.signupEmailInput = page.getByTestId('signup-email');
         this.signupButton = page.getByTestId('signup-button');
 
-        // Form Registration Inputs
-        this.genderTitleMr = page.getByLabel('Mr.');
+        // Registration Form Inputs
+        this.genderTitleMr = page.locator('#id_gender1');
         this.passwordInput = page.getByTestId('password');
         this.daysSelect = page.getByTestId('days');
         this.monthsSelect = page.getByTestId('months');
         this.yearsSelect = page.getByTestId('years');
-        this.newsletterCheckbox = page.getByLabel('Sign up for our newsletter!');
-        this.partnersCheckbox = page.getByLabel('Receive special offers from our partners!');
+        this.newsletterCheckbox = page.locator('#newsletter');
+        this.partnersCheckbox = page.locator('#optin');
         this.firstNameInput = page.getByTestId('first_name');
         this.lastNameInput = page.getByTestId('last_name');
         this.companyInput = page.getByTestId('company');
@@ -116,60 +170,80 @@ export class AuthPage {
         this.zipcodeInput = page.getByTestId('zipcode');
         this.mobileNumberInput = page.getByTestId('mobile_number');
         this.createAccountButton = page.getByTestId('create-account');
+        this.continueButton = page.getByTestId('continue-button');
     }
 
-    // Navigation Methods
-    async navigateToHome() {
-        await this.page.goto('/', { waitUntil: 'domcontentloaded' });
+    /**
+     * Directs browser navigation to the '/login' route.
+     * 
+     * @returns Promise resolving when DOM loading completes.
+     */
+    async goto(): Promise<void> {
+        await this.page.goto('/login', { waitUntil: 'domcontentloaded' });
     }
 
-    async clickSignupLogin() {
-        await this.signupLoginLink.click();
-    }
-
-    // Form Action Methods
-    async fillSignupForm(name: string, email: string) {
+    /**
+     * Fills out the initial signup form and initiates registration.
+     * 
+     * @param name - Display name for the new user account.
+     * @param email - Target email address for registration.
+     * @returns Promise resolving when submission button is clicked.
+     */
+    async fillSignupForm(name: string, email: string): Promise<void> {
         await this.signupNameInput.fill(name);
         await this.signupEmailInput.fill(email);
         await this.signupButton.click();
     }
 
-    async fillAccountDetailsForm(details: AccountDetails) {
+    /**
+     * Fills out detailed user account registration parameters and submits the creation request.
+     * 
+     * @param details - AccountDetails structure holding user information.
+     * @returns Promise resolving when account creation completes.
+     */
+    async fillAccountDetailsForm(details: AccountDetails): Promise<void> {
         await this.genderTitleMr.check();
-        await this.passwordInput.fill(details.password || 'FallbackPass123!');
-        await this.daysSelect.selectOption(details.day || '15');
-        await this.monthsSelect.selectOption(details.month || '5');
-        await this.yearsSelect.selectOption(details.year || '1995');
+        if (details.password) await this.passwordInput.fill(details.password);
+        if (details.day) await this.daysSelect.selectOption(details.day);
+        if (details.month) await this.monthsSelect.selectOption(details.month);
+        if (details.year) await this.yearsSelect.selectOption(details.year);
+
         await this.newsletterCheckbox.check();
         await this.partnersCheckbox.check();
-        await this.firstNameInput.fill(details.firstName || 'John');
-        await this.lastNameInput.fill(details.lastName || 'Doe');
-        await this.companyInput.fill(details.company || 'QA Solutions');
-        await this.addressInput.fill(details.address || '123 Automation St.');
-        await this.address2Input.fill(details.address2 || 'Suite 100');
-        await this.countrySelect.selectOption(details.country || 'United States');
-        await this.stateInput.fill(details.state || 'California');
-        await this.cityInput.fill(details.city || 'Los Angeles');
-        await this.zipcodeInput.fill(details.zipcode || '90001');
-        await this.mobileNumberInput.fill(details.mobileNumber || '1234567890');
+
+        if (details.firstName) await this.firstNameInput.fill(details.firstName);
+        if (details.lastName) await this.lastNameInput.fill(details.lastName);
+        if (details.company) await this.companyInput.fill(details.company);
+        if (details.address) await this.addressInput.fill(details.address);
+        if (details.address2) await this.address2Input.fill(details.address2);
+        if (details.country) await this.countrySelect.selectOption({ label: details.country });
+        if (details.state) await this.stateInput.fill(details.state);
+        if (details.city) await this.cityInput.fill(details.city);
+        if (details.zipcode) await this.zipcodeInput.fill(details.zipcode);
+        if (details.mobileNumber) await this.mobileNumberInput.fill(details.mobileNumber);
+
         await this.createAccountButton.click();
     }
 
-    async loginUser(email: string, password: string) {
+    /**
+     * Fills out the login credentials and submits the login form.
+     * 
+     * @param email - Registered account email.
+     * @param password - Account password.
+     * @returns Promise resolving on submission click.
+     */
+    async loginUser(email: string, password: string): Promise<void> {
         await this.loginEmailInput.fill(email);
         await this.loginPasswordInput.fill(password);
         await this.loginButton.click();
     }
 
-    async clickContinue() {
+    /**
+     * Clicks the post-registration or post-deletion 'Continue' button.
+     * 
+     * @returns Promise resolving on click completion.
+     */
+    async clickContinue(): Promise<void> {
         await this.continueButton.click();
-    }
-
-    async logout() {
-        await this.logoutLink.click();
-    }
-
-    async deleteAccount() {
-        await this.deleteAccountLink.click();
     }
 }

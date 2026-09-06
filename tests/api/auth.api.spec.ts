@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { AuthService } from '../../pages/api/services/AuthService';
+import { apiTest as test, expect } from '../../fixtures/apiFixtures';
+import { AuthService } from '../../api/services/AuthService';
 
 test.describe('Auth API Suite (API 7, 8, 9, 10)', () => {
     let authService: AuthService;
@@ -9,7 +9,6 @@ test.describe('Auth API Suite (API 7, 8, 9, 10)', () => {
     });
 
     test('API 7: POST To Verify Login with valid details', async () => {
-        // Read credentials safely from .env
         const email = process.env.TEST_EMAIL!;
         const password = process.env.TEST_USER_PASSWORD!;
 
@@ -21,10 +20,21 @@ test.describe('Auth API Suite (API 7, 8, 9, 10)', () => {
         expect(body.message).toBe('User exists!');
     });
 
-    test('API 8: POST To Verify Login without email parameter', async () => {
+    test('API 8a: POST To Verify Login without email parameter', async () => {
         const password = process.env.TEST_USER_PASSWORD!;
 
         const response = await authService.verifyLogin({ password });
+        expect(response.status()).toBe(200);
+
+        const body = await response.json();
+        expect(body.responseCode).toBe(400);
+        expect(body.message).toBe('Bad request, email or password parameter is missing in POST request.');
+    });
+
+    test('API 8b: POST To Verify Login without password parameter', async () => {
+        const email = process.env.TEST_EMAIL!;
+
+        const response = await authService.verifyLogin({ email });
         expect(response.status()).toBe(200);
 
         const body = await response.json();

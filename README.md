@@ -1,332 +1,380 @@
 # Playwright Automation Exercise
 
-A robust, maintainable end-to-end test automation framework built with **Playwright** and **TypeScript**, enforcing the **Page Object Model (POM)** pattern at the compiler level.
+A Playwright and TypeScript automation framework for testing
+[AutomationExercise.com](https://automationexercise.com).
 
-## 🎯 Project Overview
+The framework contains:
 
-This framework provides a structured approach to browser automation testing with:
-- **Strict POM discipline** enforced through TypeScript compilation
-- **Layered architecture** separating locators from actions from tests
-- **Type-safe interactions** with Playwright's modern API
-- **Zero dead code** through strict linting (`noUnusedLocals`, `noUnusedParameters`)
-- **Comprehensive test coverage** for authentication, products, cart, checkout, contact, and subscription flows
+- UI end-to-end tests
+- API tests
+- Typed Playwright fixtures
+- Page Object Model classes
+- API service and endpoint layers
+- Dynamic test-data generation
+- HTML, JUnit, screenshot, video, and trace reporting
 
-## 📁 Project Structure
+## Tech Stack
 
-```
+- Playwright Test
+- TypeScript
+- Faker.js
+- Node.js
+- GitHub Actions
+
+## Project Structure
+
+```text
 playwright-automation-exercise/
+├── api/
+│   ├── endpoints/              # API route definitions
+│   └── services/               # API request services
+│
+├── data/
+│   ├── `dummy_upload_file.txt`   # Contact form upload fixture
+│   ├── `userData.json`           # Default test-data values
+│   └── `userFactory.ts`          # Dynamic UI/API user generation
+│
+├── fixtures/
+│   ├── `apiFixtures.ts`          # API test fixtures
+│   └── `uiFixtures.ts`           # UI page-object fixtures
+│
 ├── pages/
-│   ├── actions/              # Business logic & user flows
-│   │   ├── AuthActions.ts
-│   │   ├── CartActions.ts
-│   │   ├── CheckoutActions.ts
-│   │   ├── ContactActions.ts
-│   │   ├── HomeActions.ts
-│   │   └── ProductActions.ts
-│   │
-│   └── locators/             # Centralized selectors
-│       ├── AuthLocators.ts
-│       ├── CartLocators.ts
-│       ├── CheckoutLocators.ts
-│       ├── ContactLocators.ts
-│       ├── HomeLocators.ts
-│       └── ProductLocators.ts
+│   ├── components/
+│   │   └── `NavbarComponent.ts`  # Shared navigation component
+│   ├── `AuthPage.ts`             # Login and registration
+│   ├── `CartPage.ts`             # Shopping cart
+│   ├── `CheckoutPage.ts`         # Checkout and payment
+│   ├── `ContactUsPage.ts`        # Contact form
+│   ├── `HomePage.ts`             # Home page and subscription
+│   └── `ProductPage.ts`          # Products, search, filters, and reviews
 │
-├── tests/                    # Test specs (orchestration only)
-│   ├── auth.spec.ts
-│   ├── cart.spec.ts
-│   ├── checkout.spec.ts
-│   ├── contact.spec.ts
-│   ├── home.spec.ts
-│   ├── products.spec.ts
-│   └── subscription.spec.ts
+├── tests/
+│   ├── api/                    # API specifications
+│   └── ui/                     # UI specifications
 │
-├── data/                     # Test fixtures & uploads
-│   └── dummy_upload_file.txt
+├── .github/workflows/
+│   └── `playwright.yml`          # GitHub Actions workflow
 │
-├── baseTest.ts              # Custom test base (blocks ads/analytics)
-├── playwright.config.ts     # Playwright configuration
-├── tsconfig.json            # TypeScript strict mode config
-├── package.json             # Dependencies & scripts
-└── README.md                # This file
+├── `playwright.config.ts`        # Playwright configuration
+├── `tsconfig.json`               # TypeScript configuration
+├── `package.json`                # Scripts and dependencies
+└── `README.md`
 ```
 
-## 🏗️ Architecture: Page Object Model (POM)
+## Architecture
 
-This framework enforces a **three-layer POM pattern**:
+### UI Tests
 
-### Layer 1: Locators (`pages/locators/*Locators.ts`)
-**Responsibility:** Define all UI element selectors for a page/feature
-
-```typescript
-export class AuthLocators {
-  readonly loginEmailInput: Locator;
-  readonly loginPasswordInput: Locator;
-  readonly loginButton: Locator;
-  // ... more locators
-  
-  constructor(page: Page) {
-    this.loginEmailInput = page.locator('input[data-qa="login-email"]');
-    this.loginButton = page.locator('button[data-qa="login-button"]');
-  }
-}
+```text
+UI Test
+  ↓
+UI Fixture
+  ↓
+Page Object or Shared Component
+  ↓
+Playwright Locators and Actions
+  ↓
+Application UI
 ```
 
-### Layer 2: Actions (`pages/actions/*Actions.ts`)
-**Responsibility:** Encapsulate user interactions & business workflows
+The UI fixture creates a fresh page object for each test:
 
 ```typescript
-export class AuthActions {
-  readonly authLocators: AuthLocators;
-  
-  async loginExistingUser(email: string, password: string) {
-    await this.authLocators.loginEmailInput.fill(email);
-    await this.authLocators.loginPasswordInput.fill(password);
-    await this.authLocators.loginButton.click();
-  }
-  
-  getLoginHeader() {
-    return this.authLocators.loginHeader;
-  }
-}
-```
-
-### Layer 3: Tests (`tests/*.spec.ts`)
-**Responsibility:** Orchestrate actions & assert outcomes (NO raw locators)
-
-```typescript
-test('Test Case: Login User', async () => {
-  await authActions.navigateToSignupLogin();
-  await expect(authActions.getLoginHeader()).toHaveText('Login to your account');
-  await authActions.loginExistingUser(email, password);
-  await expect(authActions.getNavbarContainer()).toContainText('Logged in as');
+test('login user', async ({ authPage, navbarComponent }) => {
+    await authPage.loginUser(email, password);
+    await expect(navbarComponent.loggedInAsUser).toBeVisible();
 });
 ```
 
-## 🚫 POM Rules (Enforced at Compile-Time)
+Tests should contain:
 
-✅ **Allowed in test files:**
-- Call action methods: `authActions.login()`
-- Use locator getters: `authActions.getLoginHeader()`
-- Use action locator objects: `authActions.authLocators.homeFeaturedItems`
-- Playwright utilities: `expect()`, `page.waitForURL()`, `page.waitForLoadState()`
+- Business scenario orchestration
+- Meaningful assertions
+- Test-specific data
 
-❌ **Forbidden in test files:**
-- Raw selectors: `page.locator('.login-form h2')`
-- Direct `getByRole()`: `page.getByRole('button', { name: 'Login' })`
-- Unused variables/parameters
+Page objects should contain:
 
-**Enforcement:** TypeScript compiler with `noUnusedLocals: true` and custom linting scripts.
+- Locators
+- Navigation
+- Reusable UI interactions
+- Reusable page workflows
 
-## 🛠️ Setup & Installation
+Selectors should remain inside page objects wherever practical.
 
-### Prerequisites
-- **Node.js** ≥ 16.x
-- **npm** or **yarn**
+### API Tests
 
-### Install Dependencies
+> Full endpoint-by-endpoint reference: [docs/api-reference.md](docs/api-reference.md)
 
-```bash
-npm install
+```text
+API Test
+  ↓
+API Fixture
+  ↓
+API Service
+  ↓
+Endpoint Definition
+  ↓
+Playwright APIRequestContext
+  ↓
+Application API
 ```
 
-This installs:
-- `@playwright/test` — Playwright testing framework
-- `typescript` — Type safety and linting
-- Supporting dev dependencies
+API services encapsulate request construction while tests validate:
 
-### Install Browsers
+- HTTP status codes
+- Application response codes
+- Response messages
+- Business data
+
+## Test Coverage
+
+The repository currently contains:
+
+| Area     | Test Count |
+|----------|------------|
+| UI tests |     25     |
+| API tests|     15     |
+| Total    |     40     |
+
+### UI Coverage
+
+- User registration
+- Login with valid credentials
+- Login with invalid credentials
+- Logout
+- Duplicate email registration
+- Contact form submission
+- Product search
+- Product details
+- Product quantity
+- Category filtering
+- Brand filtering
+- Cart operations
+- Checkout registration
+- Checkout login
+- Payment
+- Address verification
+- Invoice download
+- Product reviews
+- Newsletter subscription
+- Scroll behavior
+
+### API Coverage
+
+- Get products
+- Unsupported product method
+- Get brands
+- Unsupported brand method
+- Search products
+- Invalid product search
+- Login verification
+- Missing login parameters
+- Invalid login credentials
+- User creation
+- User lookup
+- User update
+- User deletion
+
+## Requirements
+
+Recommended runtime versions:
+
+- Node.js 20.19 or newer
+- npm 10 or newer
+
+Install dependencies:
+
+```bash
+npm ci
+```
+
+Install Playwright browsers:
 
 ```bash
 npx playwright install
 ```
 
-## ▶️ Running Tests
+For Ubuntu-based CI environments:
 
-### Run All Tests
 ```bash
-npx playwright test
+npx playwright install --with-deps
 ```
 
-### Run Specific Test File
-```bash
-npx playwright test tests/auth.spec.ts
+## Environment Configuration
+
+Create a local `.env` file:
+
+```env
+UI_BASE_URL=https://automationexercise.com
+API_BASE_URL=https://automationexercise.com/api
+TEST_EMAIL=your-test-user@example.com
+TEST_USER_PASSWORD=your-test-user-password
+TEST_PASSWORD=FallbackPass123!
 ```
 
-### Run Tests in UI Mode (Interactive)
+Do not commit `.env`.
+
+Use `.env.example` as the configuration template.
+
+## Running Tests
+
+Run all tests:
+
+```bash
+npm test
+```
+
+Run UI tests:
+
+```bash
+npm run test:ui
+```
+
+Run API tests:
+
+```bash
+npm run test:api
+```
+
+Run the UI suite in headed mode:
+
+```bash
+npm run test:headed
+```
+
+List UI tests without executing them:
+
+```bash
+npm run test:ui -- --list
+```
+
+List API tests without executing them:
+
+```bash
+npm run test:api -- --list
+```
+
+Run one test file:
+
+```bash
+npx playwright test `auth.spec.ts`
+```
+
+Run tests matching a title:
+
+```bash
+npx playwright test -g "Register User"
+```
+
+Run tests with Playwright UI mode:
+
 ```bash
 npx playwright test --ui
 ```
 
-### Run Tests in Headed Mode (See Browser)
-```bash
-npx playwright test --headed
-```
+## TypeScript Validation
 
-### Run Tests with Specific Browser
-```bash
-npx playwright test --project=chromium
-# Options: chromium, firefox, webkit
-```
+Run the TypeScript validation command:
 
-### View Test Report
-```bash
-npx playwright show-report
-```
-
-## 🔍 Linting & Type Checking
-
-### Run TypeScript Compiler Check
 ```bash
 npm run lint
 ```
 
-This enforces:
-- ✅ No unused local variables
-- ✅ No unused function parameters
-- ✅ No unused imports
-- ✅ Strict type checking
+The project uses strict TypeScript settings, including:
 
-**Output:** 0 errors = clean, maintainable code
+- `strict`
+- `noUnusedLocals`
+- `noUnusedParameters`
+- `noEmit`
 
-### Individual Check
-```bash
-npx tsc --noEmit --noUnusedLocals --noUnusedParameters
-```
+## Reports and Debugging
 
-## 📋 Test Coverage
+The project generates:
 
-The framework includes **7 test suites** covering:
+- HTML reports
+- JUnit XML reports
+- Screenshots on failure
+- Videos on failure
+- Traces on the first retry
 
-| Suite | Tests | Coverage |
-|-------|-------|----------|
-| **auth.spec.ts** | 5 | User registration, login, logout, error handling |
-| **products.spec.ts** | 5 | Product browsing, search, category/brand filtering, reviews |
-| **cart.spec.ts** | 1 | Add to cart, modify quantity, checkout flow |
-| **checkout.spec.ts** | 4 | Full checkout workflows (pre/post login, guest, etc.) |
-| **contact.spec.ts** | 1 | Contact form submission |
-| **home.spec.ts** | 2 | Home page navigation, scrolling, subscription |
-| **subscription.spec.ts** | 1 | Footer subscription |
-| **TOTAL** | **19** | End-to-end user journeys |
-
-## ⚙️ Configuration Files
-
-### `playwright.config.ts`
-Defines:
-- Base URL, timeout settings
-- Screenshot/video capture on failure
-- Multiple browser configurations (Chromium, Firefox, WebKit)
-- Custom test base that blocks analytics requests
-
-### `tsconfig.json`
-Enforces:
-```json
-{
-  "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
-  }
-}
-```
-
-## 🔐 Best Practices
-
-1. **Always create locators in `*Locators.ts`** — Never hardcode selectors in action or test files
-2. **Encapsulate workflows in `*Actions.ts`** — Keep tests readable by abstracting complex interactions
-3. **Use meaningful action method names** — `fillSignupForm()` not `fillForm()`
-4. **Provide locator getters** — For test assertions: `getLoginHeader()` returns a locator
-5. **No `page` parameter in tests** — If not using it directly, remove it
-6. **Run linter before commits** — `npm run lint` must pass
-7. **Keep tests focused** — One user journey per test case
-
-## 🚀 Continuous Integration
-
-To integrate into CI/CD:
+View the HTML report:
 
 ```bash
-# Install dependencies
-npm install
-
-# Install browsers
-npx playwright install
-
-# Run linter
-npm run lint
-
-# Run tests (headless by default in CI)
-npm test
+npm run report
 ```
 
-## 📚 Example: Adding a New Test
+Generated reports should not be committed to Git.
 
-### Step 1: Create locators
-**`pages/locators/FeatureLocators.ts`**
-```typescript
-export class FeatureLocators {
-  readonly buttonElement: Locator;
-  readonly resultMessage: Locator;
-  
-  constructor(page: Page) {
-    this.buttonElement = page.locator('button[data-qa="feature-button"]');
-    this.resultMessage = page.locator('.result-message');
-  }
-}
-```
+## Playwright Configuration
 
-### Step 2: Create actions
-**`pages/actions/FeatureActions.ts`**
-```typescript
-export class FeatureActions {
-  readonly featureLocators: FeatureLocators;
-  
-  async clickButton() {
-    await this.featureLocators.buttonElement.click();
-  }
-  
-  getResultMessage() {
-    return this.featureLocators.resultMessage;
-  }
-}
-```
+The project defines two Playwright projects:
 
-### Step 3: Write test
-**`tests/feature.spec.ts`**
-```typescript
-test('Test Case: Feature works', async () => {
-  const featureActions = new FeatureActions(page);
-  await featureActions.clickButton();
-  await expect(featureActions.getResultMessage()).toBeVisible();
-});
-```
+| Project     | Test Directory | Purpose                |
+|-------------|----------------|------------------------|
+| `ui-chrome` | `tests/ui`     | Browser-based UI tests |
+| `api`       | `tests/api`    | API tests              |
 
-## 🐛 Troubleshooting
+The configuration also defines:
 
-### Tests fail with "Element not found"
-- Check selectors in `*Locators.ts` are correct
-- Verify application is running at the configured base URL
-- Check for timing issues: add `waitFor()` in actions
+- Shared timeouts
+- Navigation timeout
+- Action timeout
+- Retry behavior in CI
+- HTML and JUnit reporters
+- Failure screenshots
+- Failure videos
+- Retry traces
+- `data-qa` as the test ID attribute
 
-### TypeScript errors on build
-- Run `npm run lint` to see all type errors
-- Ensure no unused variables: check error messages
-- Verify imports are correct: `import { Type } from './path'`
+## CI
 
-### Linter complains about unused parameters
-If a callback requires a parameter but you don't use it:
-- Remove it: `async () =>` instead of `async ({ page }) =>`
-- Or use it in the function body
+GitHub Actions runs the test suite on:
 
-## 📞 Support & Contributing
+- Pushes to `main`
+- Pull requests targeting `main`
 
-- **Questions?** Check the existing test files for examples
-- **Found a bug?** Verify it's not a selector issue first
-- **Adding features?** Follow the POM pattern strictly
+The workflow:
 
----
+1. Checks out the repository
+2. Installs Node.js
+3. Installs dependencies with `npm ci`
+4. Installs Playwright browsers
+5. Runs the test suite
+6. Uploads reports and failure artifacts
 
-**Last Updated:** August 2026  
-**Framework:** Playwright + TypeScript  
-**Pattern:** Page Object Model (POM) with Compiler Enforcement
+## Test Data
+
+User accounts are generated dynamically with Faker.js.
+
+Dynamic data helps reduce collisions during parallel execution. Test data should remain isolated per test and should not depend on a pre-existing shared account unless the scenario specifically requires it.
+
+Sensitive values should be provided through environment variables rather than committed source files.
+
+## Design Principles
+
+This project follows these principles:
+
+- Tests express business behavior.
+- Page objects own UI selectors and interactions.
+- API services own request construction.
+- Endpoint definitions centralize API routes.
+- Fixtures provide reusable test dependencies.
+- Assertions remain close to the business scenario.
+- Tests should avoid fixed waits.
+- Tests should wait for application state rather than elapsed time.
+- Test cleanup should be attempted for created external data.
+- Selectors should prefer semantic or stable test-specific locators.
+- New abstractions should be introduced only when they reduce duplication or coupling.
+
+## Known Limitations
+
+This project tests a publicly hosted external application. Test results can therefore be affected by:
+
+- Network availability
+- External application downtime
+- Changes to the website
+- Shared remote application state
+- Third-party resources
+- Account creation or cleanup failures
+
+The test suite is intended for demonstration and portfolio purposes rather than production application certification.

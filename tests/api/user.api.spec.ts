@@ -1,29 +1,15 @@
-import { test, expect } from '@playwright/test';
-import { UserService } from '../../pages/api/services/UserService';
+import { apiTest as test, expect } from '../../fixtures/apiFixtures';
+import { UserService } from '../../api/services/UserService';
+import { createDynamicUser, TestUser } from '../../data/userFactory';
 
 test.describe.serial('User Account API Lifecycle Suite (API 11, 12, 13, 14)', () => {
     let userService: UserService;
+    let testUser: TestUser;
 
-    // Generate unique user details per test execution
-    const testUser = {
-        name: 'John Lifecycle',
-        email: `lifecycle_user_${Date.now()}@example.com`,
-        password: 'Password123',
-        title: 'Mr',
-        birth_date: '15',
-        birth_month: '08',
-        birth_year: '1990',
-        firstname: 'John',
-        lastname: 'Doe',
-        company: 'QA Corp',
-        address1: '100 Automation Ave',
-        address2: 'Suite 200',
-        country: 'United States',
-        zipcode: '90001',
-        state: 'California',
-        city: 'Los Angeles',
-        mobile_number: '9876543210'
-    };
+    test.beforeAll(async () => {
+        // Generate a single user instance for the entire serial lifecycle
+        testUser = createDynamicUser();
+    });
 
     test.beforeEach(async ({ request }) => {
         userService = new UserService(request);
@@ -52,7 +38,7 @@ test.describe.serial('User Account API Lifecycle Suite (API 11, 12, 13, 14)', ()
     test('API 13: PUT To Update User Account', async () => {
         const updatedUser = {
             ...testUser,
-            name: 'John Lifecycle Updated',
+            name: `${testUser.name} Updated`,
             company: 'Updated QA Corp'
         };
 
