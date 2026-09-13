@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 /**
  * ProductPage Class
@@ -106,18 +106,15 @@ export class ProductPage {
     /** Locator for header navigation link to Products catalog */
     readonly productsNavLink: Locator;
 
-    /** Locator for 'Women' category panel container */
-    readonly womenCategoryPanel: Locator;
-
-    /** Locator for 'Men' category panel container */
-    readonly menCategoryPanel: Locator;
-
     /** Locator for cart table item rows */
     readonly cartItemsTableRows: Locator;
 
+    /** Locator for the cart confirmation modal displayed after adding a product */
+    readonly cartModal: Locator;
+
     /**
      * Initializes product page locators.
-     * 
+     *
      * @param page - Active Playwright Page instance.
      */
     constructor(page: Page) {
@@ -127,6 +124,7 @@ export class ProductPage {
         this.productHeader = page.locator('h2:has-text("All Products")');
         this.productsGrid = page.locator('.features_items');
         this.viewProductButton = page.locator('a:has-text("View Product")').first();
+        this.cartModal = page.locator('#cartModal');
 
         // Search Bar
         this.searchInput = page.locator('input#search_product');
@@ -148,8 +146,8 @@ export class ProductPage {
         this.firstProductCard = page.locator('.features_items .col-sm-4').nth(0);
         this.secondProductCard = page.locator('.features_items .col-sm-4').nth(1);
         this.productCards = page.locator('.features_items .col-sm-4');
-        this.continueShoppingButton = page.locator('button.btn.btn-success.close-modal.btn-block');
-        this.viewCartModalLink = page.locator('.modal-body a:has-text("View Cart")');
+        this.continueShoppingButton = this.cartModal.locator('button.btn.btn-success.close-modal.btn-block');
+        this.viewCartModalLink = this.cartModal.locator('.modal-body a:has-text("View Cart")');
 
         // Quantity & Details Interactivity
         this.quantityInput = page.locator('input#quantity');
@@ -170,15 +168,17 @@ export class ProductPage {
         this.brandTitleHeader = page.locator('.features_items h2.title');
         this.productsNavLink = page.getByRole('link', { name: 'Products' });
 
-        // Panels & Tables
-        this.womenCategoryPanel = page.locator('#Women');
-        this.menCategoryPanel = page.locator('#Men');
+        // Tables
+        // Note: `womenCategoryPanel`/`menCategoryPanel` locators previously
+        // lived here but were never referenced anywhere — the accordion
+        // panels are addressed dynamically via `getCategoryGroupHeader()`/
+        // `getCategorySubLink()` below instead. Removed as dead code.
         this.cartItemsTableRows = page.locator('#cart_info_table tbody tr');
     }
 
     /**
      * Builds a dynamic locator for a gender-based category accordion group header.
-     * 
+     *
      * @param gender - Category group name ('Women', 'Men', or 'Kids').
      * @returns Playwright Locator targeting category expander link.
      */
@@ -188,7 +188,7 @@ export class ProductPage {
 
     /**
      * Builds a dynamic locator for a sub-category link under a gender group.
-     * 
+     *
      * @param gender - Parent category group.
      * @param subCategoryName - Sub-category label (e.g., 'Dress', 'Tops').
      * @returns Playwright Locator targeting sub-category filter link.
@@ -199,7 +199,7 @@ export class ProductPage {
 
     /**
      * Builds a dynamic locator for a brand link inside sidebar list.
-     * 
+     *
      * @param brandName - Brand title (e.g., 'Polo', 'Madame').
      * @returns Playwright Locator targeting brand filter link.
      */
@@ -211,7 +211,7 @@ export class ProductPage {
      * Directs browser to product catalog route `/products`.
      */
     async navigateToProducts(): Promise<void> {
-        await this.page.goto('/products');
+        await this.page.goto('/products', { waitUntil: 'domcontentloaded' });
     }
 
     /**
@@ -231,7 +231,7 @@ export class ProductPage {
 
     /**
      * Executes product catalog search query.
-     * 
+     *
      * @param productName - Search term keyword.
      */
     async searchProduct(productName: string): Promise<void> {
@@ -240,34 +240,49 @@ export class ProductPage {
     }
 
     /**
+     * Waits for the first visible product card's image to fully finish loading.
+     * Used instead of 'networkidle' because this site has continuous
+     * ad/analytics traffic (Google Ads, funding-choices, Cloudflare RUM) that
+     * can prevent networkidle from ever resolving.
+     */
+    private async waitForProductGridImagesLoaded(): Promise<void> {
+        await this.productCards.first().locator('img').first().waitFor({ state: 'visible' });
+        await this.page.waitForFunction(() => {
+            const img = document.querySelector('.features_items .col-sm-4 img') as HTMLImageElement | null;
+            return !!img && img.complete && img.naturalWidth > 0;
+        });
+    }
+
+    /**
      * Adds top two products to cart sequentially with modal handling, then views cart.
      */
     async addTwoProductsSequential(): Promise<void> {
         // Product 1
-        await this.firstProductCard.scrollIntoViewIfNeeded();
+        await this.waitForProductGridImagesLoaded();
+        await this.firstProductCard.evaluate(el => el.scrollIntoView({ block: 'center' }));
         await this.firstProductCard.hover();
         const firstOverlayBtn = this.firstProductCard.locator('.overlay-content .add-to-cart');
         await firstOverlayBtn.waitFor({ state: 'visible' });
         await firstOverlayBtn.click();
 
-        await this.page.locator('#cartModal').waitFor({ state: 'visible' });
+        await this.cartModal.waitFor({ state: 'visible' });
         await this.continueShoppingButton.click();
-        await this.page.locator('#cartModal').waitFor({ state: 'hidden' });
+        await this.cartModal.waitFor({ state: 'hidden' });
 
         // Product 2
-        await this.secondProductCard.scrollIntoViewIfNeeded();
+        await this.secondProductCard.evaluate(el => el.scrollIntoView({ block: 'center' }));
         await this.secondProductCard.hover();
         const secondOverlayBtn = this.secondProductCard.locator('.overlay-content .add-to-cart');
         await secondOverlayBtn.waitFor({ state: 'visible' });
         await secondOverlayBtn.click();
 
-        await this.page.locator('#cartModal').waitFor({ state: 'visible' });
+        await this.cartModal.waitFor({ state: 'visible' });
         await this.viewCartModalLink.click();
     }
 
     /**
      * Sets purchase quantity value inside product detail view.
-     * 
+     *
      * @param quantity - Desired numerical count.
      */
     async setProductQuantity(quantity: string | number): Promise<void> {
@@ -276,7 +291,7 @@ export class ProductPage {
 
     /**
      * Fills out and submits product feedback review form.
-     * 
+     *
      * @param name - Reviewer display name.
      * @param email - Reviewer email.
      * @param reviewText - Feedback description.
@@ -297,24 +312,70 @@ export class ProductPage {
     }
 
     /**
-     * Iterates over all currently visible product cards and adds each to cart with modal dismissals.
+     * Expands a gender category group and waits for its sub-category panel to become visible.
+     *
+     * This site's category accordion is a Bootstrap `.collapse` component:
+     * clicking an already-open header toggles it CLOSED, so we check the
+     * panel's actual rendered height first rather than assuming a click is
+     * always the right action.
+     *
+     * @param gender - Category group name ('Women', 'Men', or 'Kids').
+     */
+    async expandCategoryGroup(gender: 'Women' | 'Men' | 'Kids'): Promise<void> {
+        const categoryHeader = this.getCategoryGroupHeader(gender);
+        const categoryPanel = this.page.locator(`#${gender}`);
+
+        await categoryHeader.scrollIntoViewIfNeeded();
+
+        for (let attempt = 0; attempt < 2; attempt++) {
+            const isOpen = await categoryPanel.evaluate(
+                el => el.clientHeight > 0 && window.getComputedStyle(el).display !== 'none'
+            );
+            if (isOpen) return;
+
+            await categoryHeader.click();
+
+            // Poll the panel's actual rendered height instead of a fixed
+            // sleep — waits only as long as the collapse animation
+            // actually takes, rather than always paying a flat delay.
+            try {
+                await expect.poll(
+                    () => categoryPanel.evaluate(el => el.clientHeight),
+                    { timeout: 5000 }
+                ).toBeGreaterThan(0);
+                return;
+            } catch {
+                // Didn't open on this attempt — loop and try clicking again.
+            }
+        }
+    }
+
+    /**
+     * Iterates over all currently visible product cards and adds each product
+     * to the cart, handling the confirmation modal after each addition.
      */
     async addAllVisibleProductsToCart(): Promise<void> {
+        await this.waitForProductGridImagesLoaded();
+
         const count = await this.productCards.count();
 
         for (let i = 0; i < count; i++) {
             const productCard = this.productCards.nth(i);
 
-            await productCard.scrollIntoViewIfNeeded();
+            await productCard.evaluate(el => el.scrollIntoView({ block: 'center' }));
             await productCard.hover();
 
             const overlayBtn = productCard.locator('.overlay-content .add-to-cart');
-            await overlayBtn.waitFor({ state: 'visible' });
+
+            await overlayBtn.waitFor({ state: 'visible', timeout: 15000 });
             await overlayBtn.click();
 
-            await this.page.locator('#cartModal').waitFor({ state: 'visible' });
+            await this.continueShoppingButton.waitFor({ state: 'visible', timeout: 15000 });
             await this.continueShoppingButton.click();
-            await this.page.locator('#cartModal').waitFor({ state: 'hidden' });
+
+            await this.cartModal.waitFor({ state: 'hidden', timeout: 15000 });
+
+            await this.page.mouse.move(0, 0);
         }
     }
 }

@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 /**
  * CheckoutPage Class
@@ -14,16 +14,18 @@ export class CheckoutPage {
     /** Locator for 'Review Your Order' step header */
     readonly reviewYourOrderHeader: Locator;
 
-    /** Locator for delivery address container */
-    readonly deliveryAddressDetails: Locator;
-
-    /** Locator for billing/invoice address container */
-    readonly billingAddressDetails: Locator;
-
-    /** Alternative locator for delivery address box */
+    /**
+     * Locator for the delivery address display box.
+     * Note: previously duplicated as `deliveryAddressDetails` (identical
+     * selector, different name) — consolidated to this single locator.
+     */
     readonly deliveryAddressBox: Locator;
 
-    /** Alternative locator for billing address box */
+    /**
+     * Locator for the billing/invoice address display box.
+     * Note: previously duplicated as `billingAddressDetails` (identical
+     * selector, different name) — consolidated to this single locator.
+     */
     readonly billingAddressBox: Locator;
 
     /** Textarea locator for custom order instructions or comments */
@@ -88,7 +90,7 @@ export class CheckoutPage {
 
     /**
      * Initializes checkout page locators.
-     * 
+     *
      * @param page - Active Playwright Page instance.
      */
     constructor(page: Page) {
@@ -97,8 +99,6 @@ export class CheckoutPage {
         // Address & Order Details
         this.addressDetailsHeader = page.locator('h2:has-text("Address Details")');
         this.reviewYourOrderHeader = page.locator('h2:has-text("Review Your Order")');
-        this.deliveryAddressDetails = page.locator('#address_delivery');
-        this.billingAddressDetails = page.locator('#address_invoice');
         this.deliveryAddressBox = page.locator('#address_delivery');
         this.billingAddressBox = page.locator('#address_invoice');
         this.orderCommentArea = page.locator('textarea[name="message"]');
@@ -112,25 +112,41 @@ export class CheckoutPage {
         this.cardExpiryYearInput = page.locator('input[name="expiry_year"]');
         this.submitPaymentButton = page.locator('#submit');
         this.orderSuccessAlert = page.locator('p', { hasText: 'Congratulations! Your order has been confirmed!' });
-        this.orderPlacedAlert = page.locator('[data-qa="order-placed"]');
+        this.orderPlacedAlert = page.getByTestId('order-placed');
 
         // Modals & Navigation Headers
-        this.modalRegisterLoginButton = page.locator('.modal-body a[href="/login"]');
-        this.accountCreatedHeader = page.locator('[data-qa="account-created"]');
-        this.accountDeletedHeader = page.locator('[data-qa="account-deleted"]');
-        this.continueButton = page.locator('[data-qa="continue-button"]');
+        // this.checkoutModal must be assigned BEFORE modalRegisterLoginButton
+        // below, since that locator is scoped from this one.
+        this.accountCreatedHeader = page.getByTestId('account-created');
+        this.accountDeletedHeader = page.getByTestId('account-deleted');
+        this.continueButton = page.getByTestId('continue-button');
         this.navbarContainer = page.locator('header .navbar-nav');
         this.proceedToCheckoutButton = page.locator('.check_out');
         this.cartModal = page.locator('#cartModal');
         this.checkoutModal = page.locator('#checkoutModal');
+
+        // Scoped to the checkout modal specifically (not just any
+        // `.modal-body` on the page) so this can never accidentally match
+        // a login link inside a different modal.
+        this.modalRegisterLoginButton = this.checkoutModal.locator('.modal-body a[href="/login"]');
+
         this.shoppingCartBreadcrumb = page.locator('li', { hasText: 'Shopping Cart' });
         this.downloadInvoiceLink = page.locator('a:has-text("Download Invoice")');
     }
 
     /**
      * Navigates to authentication page from the guest checkout warning modal.
+     * Waits for the modal itself to finish opening (Bootstrap's fade
+     * transition) before clicking inside it, avoiding a race where the
+     * link exists in the DOM but the modal hasn't visually appeared yet.
      */
     async clickRegisterLoginFromCheckout(): Promise<void> {
+        await expect(async () => {
+            await this.checkoutModal.waitFor({ state: 'visible', timeout: 3000 }).catch(async () => {
+                await this.proceedToCheckoutButton.click();
+                await this.checkoutModal.waitFor({ state: 'visible', timeout: 3000 });
+            });
+        }).toPass({ timeout: 15000 });
         await this.modalRegisterLoginButton.click();
     }
 
@@ -144,7 +160,7 @@ export class CheckoutPage {
 
     /**
      * Enters custom order comment and proceeds to the payment view.
-     * 
+     *
      * @param comment - Text note to attach to the order.
      */
     async fillOrderCommentAndPlaceOrder(comment: string): Promise<void> {
@@ -154,7 +170,7 @@ export class CheckoutPage {
 
     /**
      * Fills out credit card details in payment form fields.
-     * 
+     *
      * @param nameOnCard - Name printed on card.
      * @param cardNumber - 16-digit card number.
      * @param cvc - Card verification code.
@@ -202,6 +218,7 @@ export class CheckoutPage {
      * Clicks proceed to checkout trigger button.
      */
     async clickProceedToCheckout(): Promise<void> {
+        await this.proceedToCheckoutButton.waitFor({ state: 'visible', timeout: 15000 });
         await this.proceedToCheckoutButton.click();
     }
 
@@ -242,7 +259,7 @@ export class CheckoutPage {
 
     /**
      * Initiates invoice download event and captures returning promise payload.
-     * 
+     *
      * @returns Promise resolving to Playwright Download event object.
      */
     async downloadInvoice() {

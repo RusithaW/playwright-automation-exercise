@@ -67,37 +67,38 @@ test.describe('Products Page Navigation and Search Validations', () => {
 
     test('Test Case 18: View Category Products', async ({ page, homePage, productPage }) => {
         await homePage.navigateToHome();
-
         await expect(productPage.categorySidebar).toBeVisible();
-        await page.waitForTimeout(1000);
 
-        await productPage.getCategoryGroupHeader('Women').click();
-        await expect(productPage.womenCategoryPanel).toHaveClass(/collapse in|collapsing/);
+        await productPage.expandCategoryGroup('Women');
 
         const dressLink = productPage.getCategorySubLink('Women', 'Dress');
+        await expect(dressLink).toBeVisible();
         await dressLink.click();
 
         await expect(page).toHaveURL(/.*category_products.*/);
-        await expect(productPage.categoryTitleHeader).toHaveText('Women - Dress Products', { ignoreCase: true });
+        await expect(productPage.categoryTitleHeader).toHaveText(
+            'Women - Dress Products',
+            { ignoreCase: true }
+        );
 
-        await page.waitForTimeout(1000);
-
-        await productPage.getCategoryGroupHeader('Men').click();
-        await expect(productPage.menCategoryPanel).toHaveClass(/collapse in|collapsing/);
+        await productPage.expandCategoryGroup('Men');
 
         const tshirtsLink = productPage.getCategorySubLink('Men', 'Tshirts');
+        await expect(tshirtsLink).toBeVisible();
         await tshirtsLink.click();
 
         await expect(page).toHaveURL(/.*category_products.*/);
-        await expect(productPage.categoryTitleHeader).toHaveText('Men - Tshirts Products', { ignoreCase: true });
+        await expect(productPage.categoryTitleHeader).toHaveText(
+            'Men - Tshirts Products',
+            { ignoreCase: true }
+        );
     });
 
     test('Test Case 19: View & Cart Brand Products', async ({ page, homePage, productPage }) => {
         await homePage.navigateToHome();
-
         await productPage.navigateToProductsViaHeaderLink();
-        await expect(productPage.brandSidebar).toBeVisible();
 
+        await expect(productPage.brandSidebar).toBeVisible();
         await productPage.getBrandLink('Polo').click();
 
         await expect(page).toHaveURL(/.*brand_products.*/);
@@ -109,13 +110,17 @@ test.describe('Products Page Navigation and Search Validations', () => {
         await expect(productPage.brandTitleHeader).toHaveText('Brand - H&M Products', { ignoreCase: true });
     });
 
-    test('Test Case 20: Search Products and Verify Cart After Login', async ({ page, testUser, homePage, navbarComponent, authPage, productPage, cartPage, checkoutPage }) => {
-        // Pre-requisite: Register fresh account via UI using fixture
-        await homePage.navigateToHome();
-        await navbarComponent.clickSignupLogin();
-        await authPage.fillSignupForm(testUser.name, testUser.email);
-        await authPage.fillAccountDetailsForm(testUser);
-        await checkoutPage.clickContinue();
+    // TC20's account creation is pure setup — the test needs *a* valid,
+    // logged-out account to prove cart items survive a later login. The
+    // `registeredUser` fixture handles creation (and leaves the browser
+    // logged in), so the test immediately logs out to begin the actual
+    // scenario from a clean, anonymous state, exactly as the official
+    // test case describes. Fixture teardown deletes the account
+    // automatically once the test finishes.
+    test('Test Case 20: Search Products and Verify Cart After Login', async ({ page, registeredUser, homePage, navbarComponent, authPage, productPage, cartPage }) => {
+        // Fixture already registered `registeredUser` and left us logged in.
+        // Log out now so the test starts the real scenario as an anonymous
+        // shopper, matching the official test case's intent.
         await navbarComponent.clickLogout();
 
         // 1-2. Navigate to home
@@ -140,9 +145,10 @@ test.describe('Products Page Navigation and Search Validations', () => {
         const totalItemsCount = await productPage.cartItemsTableRows.count();
         expect(totalItemsCount).toBeGreaterThan(0);
 
-        // 10. Login
+        // 10. Login as the fixture-created user
         await navbarComponent.clickSignupLogin();
-        await authPage.loginUser(testUser.email, testUser.password);
+        await page.waitForURL('**/login');
+        await authPage.loginUser(registeredUser.email, registeredUser.password);
 
         // 11. Return to Cart
         await cartPage.navbarCartLink.click();
@@ -151,9 +157,8 @@ test.describe('Products Page Navigation and Search Validations', () => {
         // 12. Verify cart items persist post-login
         await expect(productPage.cartItemsTableRows).toHaveCount(totalItemsCount);
 
-        // Cleanup: Delete account
-        await navbarComponent.clickDeleteAccount();
-        await checkoutPage.clickContinue();
+        // Account cleanup happens automatically in the `registeredUser`
+        // fixture's teardown after this test completes.
     });
 
     test('Test Case 21: Add review on product', async ({ page, testUser, homePage, productPage }) => {

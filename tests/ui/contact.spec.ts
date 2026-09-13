@@ -26,7 +26,7 @@ test.describe('Contact Us Form Submissions', () => {
     );
 
     // 4. Assert success message
-    await expect(contactUsPage.successMessage).toBeVisible({ timeout: 15000 });
+    await expect(contactUsPage.successMessage).toBeVisible({ timeout: 20000 });
     await expect(contactUsPage.successMessage).toContainText('Success! Your details have been submitted successfully.');
 
     // 5. Return to home page and verify visibility

@@ -132,9 +132,9 @@ The repository currently contains:
 
 | Area     | Test Count |
 |----------|------------|
-| UI tests |     25     |
+| UI tests |     26     |
 | API tests|     15     |
-| Total    |     40     |
+| Total    |     41     |
 
 ### UI Coverage
 

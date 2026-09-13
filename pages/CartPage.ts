@@ -3,7 +3,7 @@ import { Page, Locator } from '@playwright/test';
 /**
  * CartPage Class
  * Page Object representing the Shopping Cart view (`/view_cart`).
- * Handles item table interactions, checkout navigation, and dynamic cart clearance.
+ * Handles item table interactions and checkout navigation.
  */
 export class CartPage {
     readonly page: Page;
@@ -17,9 +17,6 @@ export class CartPage {
     /** Locator for cart table row elements */
     readonly cartRows: Locator;
 
-    /** Locator for item deletion buttons across cart rows */
-    readonly cartDeleteButtons: Locator;
-
     /** Locator for disabled quantity display button */
     readonly cartQuantityButton: Locator;
 
@@ -28,7 +25,7 @@ export class CartPage {
 
     /**
      * Initializes cart page locators.
-     * 
+     *
      * @param page - Active Playwright Page instance.
      */
     constructor(page: Page) {
@@ -38,12 +35,11 @@ export class CartPage {
         this.cartRows = page.locator('table#cart_info_table tbody tr');
         this.cartQuantityButton = page.locator('#cart_info_table .disabled');
         this.proceedToCheckoutButton = page.locator('a.btn.btn-default.check_out');
-        this.cartDeleteButtons = page.locator('a.cart_quantity_delete');
     }
 
     /**
      * Dynamic helper providing field-level locators for a specific cart row index.
-     * 
+     *
      * @param index - Zero-based index of target table row.
      * @returns Object containing sub-locators for name, price, quantity, total, and deletion.
      */
@@ -69,32 +65,15 @@ export class CartPage {
      * Waits for page load stabilization and clicks 'Proceed To Checkout'.
      */
     async clickProceedToCheckout(): Promise<void> {
-        await this.page.waitForLoadState('networkidle');
-        await this.proceedToCheckoutButton.waitFor({ state: 'visible' });
+        await this.proceedToCheckoutButton.waitFor({ state: 'visible', timeout: 15000 });
         await this.proceedToCheckoutButton.click();
     }
 
-    /**
-     * Continuously removes top-level products until the cart is entirely empty.
-     * Uses DOM script execution with standard click fallbacks for animation stabilization.
-     */
-    async removeAllProductsDynamically(): Promise<void> {
-        await this.cartRows.first().waitFor({ state: 'visible' });
-
-        while ((await this.cartRows.count()) > 0) {
-            const targetRow = this.cartRows.first();
-            const rowId = await targetRow.getAttribute('id');
-
-            await this.page.waitForFunction(async ({ targetId, selector }) => {
-                const button = document.querySelector(`${selector} a.cart_quantity_delete`) as HTMLElement;
-                if (button) button.click();
-                if (targetId) {
-                    return !document.getElementById(targetId);
-                }
-                return true;
-            }, { targetId: rowId, selector: 'table#cart_info_table tbody tr:first-child' }, { timeout: 10000 }).catch(async () => {
-                await targetRow.locator('.cart_quantity_delete').click().catch(() => { });
-            });
-        }
-    }
+    // Note: an earlier `removeAllProductsDynamically()` method previously
+    // lived here but was never called anywhere in the suite — TC17
+    // ("Remove All Products Dynamically From Cart") implements its own
+    // inline delete loop directly in cart.spec.ts using
+    // `expect().toPass()`, which is the version actually exercised.
+    // Removed to avoid having two divergent implementations of the same
+    // behavior, only one of which was live.
 }

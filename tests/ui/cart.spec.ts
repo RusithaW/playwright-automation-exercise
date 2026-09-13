@@ -55,4 +55,25 @@ test.describe('Shopping Cart Flow Architecture Validation', () => {
         // 4. Verify empty cart container is displayed
         await expect(page.locator('#empty_cart')).toBeVisible();
     });
+
+    test('Test Case 22: Add to cart from Recommended items', async ({ page, homePage, productPage, cartPage }) => {
+        // 1-2. Launch browser & navigate to home
+        await homePage.navigateToHome();
+        await expect(homePage.featuredItems).toBeVisible();
+
+        // 3-4. Scroll to bottom, verify Recommended Items visible
+        await homePage.scrollToBottom();
+        await expect(homePage.recommendedItemsHeader).toBeVisible();
+
+        // 5. Add to cart from Recommended items
+        await homePage.addFirstRecommendedItemToCart();
+
+        // 6. Click View Cart
+        await productPage.viewCartModalLink.click();
+        await page.waitForURL('**/view_cart');
+
+        // 7. Verify product is displayed in cart page
+        await expect(cartPage.cartBreadcrumb).toBeVisible();
+        await expect(cartPage.cartRows).not.toHaveCount(0);
+    });
 });

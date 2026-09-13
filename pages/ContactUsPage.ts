@@ -8,9 +8,6 @@ import { Page, Locator } from '@playwright/test';
 export class ContactUsPage {
     readonly page: Page;
 
-    /** Locator for header link navigating to Contact Us form */
-    readonly contactUsLink: Locator;
-
     /** Locator for 'GET IN TOUCH' header */
     readonly getInTouchHeader: Locator;
 
@@ -40,37 +37,44 @@ export class ContactUsPage {
 
     /**
      * Initializes contact page locators.
-     * 
+     *
      * @param page - Active Playwright Page instance.
      */
     constructor(page: Page) {
         this.page = page;
 
         // Navigation & Headers
-        this.contactUsLink = page.locator('text=Contact Us');
+        // Note: navigation to this page is handled by
+        // NavbarComponent.clickContactUs(), which is what every spec
+        // actually calls — a separate `contactUsLink`/navigateToContactUs()
+        // pair used to live here but was dead code (never referenced).
         this.getInTouchHeader = page.locator('h2:has-text("Get In Touch")');
         this.successMessage = page.locator('div.status.alert.alert-success');
         this.homeButton = page.locator('.navbar-nav a:has-text("Home")');
 
         // Form Fields & Buttons
-        this.nameInput = page.locator('input[data-qa="name"]');
-        this.emailInput = page.locator('input[data-qa="email"]');
-        this.subjectInput = page.locator('input[data-qa="subject"]');
-        this.messageInput = page.locator('textarea[data-qa="message"]');
+        // Uses getByTestId() against the site's `data-qa` attributes,
+        // matching `testIdAttribute: 'data-qa'` in playwright.config.ts,
+        // instead of hand-rolled `[data-qa="..."]` CSS selectors.
+        this.nameInput = page.getByTestId('name');
+        this.emailInput = page.getByTestId('email');
+        this.subjectInput = page.getByTestId('subject');
+        this.messageInput = page.getByTestId('message');
         this.uploadFileInput = page.locator('input[name="upload_file"]');
-        this.submitButton = page.locator('input[data-qa="submit-button"]');
+        this.submitButton = page.getByTestId('submit-button');
     }
 
     /**
-     * Navigates to contact page via header link.
-     */
-    async navigateToContactUs(): Promise<void> {
-        await this.contactUsLink.click();
-    }
-
-    /**
-     * Populates support message, attaches specified file, handles confirm dialog, and submits form.
-     * 
+     * Populates support message, attaches specified file, handles the
+     * native browser confirm dialog, and submits the form.
+     *
+     * The confirm() dialog is registered with `page.once()` (not `page.on()`)
+     * so it only intercepts this one expected dialog, rather than silently
+     * auto-accepting any future dialog that might appear later in the test.
+     * It's registered BEFORE the click to avoid a race where the dialog
+     * fires and gets auto-dismissed by Playwright's default behavior
+     * before our handler is attached.
+     *
      * @param name - Sender full name.
      * @param email - Sender contact email.
      * @param subject - Message subject title.
@@ -87,10 +91,8 @@ export class ContactUsPage {
             await this.uploadFileInput.setInputFiles(filePath);
         }
 
-        this.page.once('dialog', async (dialog) => {
-            await dialog.accept();
-        });
-
+        await this.submitButton.waitFor({ state: 'visible' });
+        this.page.once('dialog', dialog => dialog.accept());
         await this.submitButton.click();
     }
 

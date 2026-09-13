@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 
 /**
  * HomePage Class
@@ -35,6 +35,12 @@ export class HomePage {
     /** Locator for subscription confirmation alert banner */
     readonly subscriptionSuccessAlert: Locator;
 
+    /** Locator for 'RECOMMENDED ITEMS' section header */
+    readonly recommendedItemsHeader: Locator;
+
+    /** Locator for recommended items carousel/container */
+    readonly recommendedItemsSection: Locator;
+
     /**
      * Initializes home page locators.
      * 
@@ -57,6 +63,10 @@ export class HomePage {
         this.subscriptionInput = page.locator('#susbscribe_email');
         this.subscriptionButton = page.locator('#subscribe');
         this.subscriptionSuccessAlert = page.locator('#success-subscribe .alert-success');
+
+        // Recommended Items
+        this.recommendedItemsHeader = page.locator('h2:has-text("RECOMMENDED ITEMS")');
+        this.recommendedItemsSection = page.locator('#recommended-item-carousel');
     }
 
     /**
@@ -111,6 +121,28 @@ export class HomePage {
      * Waits for subscription success alert to become visible.
      */
     async waitForSubscriptionSuccessAlert(): Promise<void> {
-        await this.subscriptionSuccessAlert.waitFor({ state: 'visible' });
+        await expect(this.subscriptionSuccessAlert).toBeVisible({ timeout: 20000 });
+    }
+
+    /**
+    * Adds the first visible product from the Recommended Items carousel to cart.
+    */
+    /**
+* Adds the first product from the Recommended Items carousel to cart.
+*/
+    async addFirstRecommendedItemToCart(): Promise<void> {
+        await this.recommendedItemsSection.scrollIntoViewIfNeeded();
+
+        const activeItem = this.recommendedItemsSection.locator('.item.active').first();
+        const addToCartLink = activeItem.locator('a:has-text("Add to cart")').first();
+
+        // This site's modal occasionally fails to open on the first click
+        // (cause unconfirmed, suspected JS-binding timing) — retry the click
+        // itself rather than waiting once and failing.
+        await expect(async () => {
+            await addToCartLink.waitFor({ state: 'visible', timeout: 15000 });
+            await addToCartLink.click();
+            await this.page.locator('#cartModal').waitFor({ state: 'visible', timeout: 3000 });
+        }).toPass({ timeout: 20000 });
     }
 }

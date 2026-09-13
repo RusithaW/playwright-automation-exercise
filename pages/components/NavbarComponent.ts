@@ -6,6 +6,8 @@ import { Page, Locator } from '@playwright/test';
  * Encapsulates global navigation locators and user action methods.
  */
 export class NavbarComponent {
+    private readonly page: Page;
+
     /** Locator for the 'Signup / Login' link in the header */
     readonly signupLoginLink: Locator;
 
@@ -27,6 +29,7 @@ export class NavbarComponent {
      * @param page - Playwright Page object representing the active browser tab.
      */
     constructor(page: Page) {
+        this.page = page;
         this.signupLoginLink = page.getByRole('link', { name: 'Signup / Login' });
         this.logoutLink = page.getByRole('link', { name: 'Logout' });
         this.deleteAccountLink = page.getByRole('link', { name: 'Delete Account' });
@@ -49,10 +52,12 @@ export class NavbarComponent {
     }
 
     /**
-     * Triggers account deletion by clicking the 'Delete Account' link.
+     * Triggers account deletion by clicking the 'Delete Account' link
+     * and waits for navigation to the confirmation page.
      */
     async clickDeleteAccount(): Promise<void> {
         await this.deleteAccountLink.click();
+        await this.page.waitForURL('**/delete_account');
     }
 
     /**

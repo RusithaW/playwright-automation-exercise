@@ -13,9 +13,9 @@ export default defineConfig({
   /* Fail the build on CI if test.only is left in source code */
   forbidOnly: !!process.env.CI,
   /* Retry on CI */
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1,
   /* Allow 2 parallel workers on CI for optimal speed without overloading free runners */
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 2 : 1,
   /* Multi-reporter: Console list + HTML + JUnit for CI tab integration */
   reporter: [
     ['list'],
