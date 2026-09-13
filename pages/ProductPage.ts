@@ -169,10 +169,6 @@ export class ProductPage {
         this.productsNavLink = page.getByRole('link', { name: 'Products' });
 
         // Tables
-        // Note: `womenCategoryPanel`/`menCategoryPanel` locators previously
-        // lived here but were never referenced anywhere — the accordion
-        // panels are addressed dynamically via `getCategoryGroupHeader()`/
-        // `getCategorySubLink()` below instead. Removed as dead code.
         this.cartItemsTableRows = page.locator('#cart_info_table tbody tr');
     }
 

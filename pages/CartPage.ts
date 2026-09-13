@@ -68,12 +68,4 @@ export class CartPage {
         await this.proceedToCheckoutButton.waitFor({ state: 'visible', timeout: 15000 });
         await this.proceedToCheckoutButton.click();
     }
-
-    // Note: an earlier `removeAllProductsDynamically()` method previously
-    // lived here but was never called anywhere in the suite — TC17
-    // ("Remove All Products Dynamically From Cart") implements its own
-    // inline delete loop directly in cart.spec.ts using
-    // `expect().toPass()`, which is the version actually exercised.
-    // Removed to avoid having two divergent implementations of the same
-    // behavior, only one of which was live.
 }

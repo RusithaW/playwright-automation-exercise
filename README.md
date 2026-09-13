@@ -52,8 +52,8 @@ playwright-automation-exercise/
 │   ├── api/                    # API specifications
 │   └── ui/                     # UI specifications
 │
-├── .github/workflows/
-│   └── `playwright.yml`          # GitHub Actions workflow
+├── .github/
+│   └── `copilot-instructions.md`          # Copilot Instructions
 │
 ├── `playwright.config.ts`        # Playwright configuration
 ├── `tsconfig.json`               # TypeScript configuration
@@ -328,19 +328,8 @@ The configuration also defines:
 
 ## CI
 
-GitHub Actions runs the test suite on:
-
-- Pushes to `main`
-- Pull requests targeting `main`
-
-The workflow:
-
-1. Checks out the repository
-2. Installs Node.js
-3. Installs dependencies with `npm ci`
-4. Installs Playwright browsers
-5. Runs the test suite
-6. Uploads reports and failure artifacts
+This project is not currently wired to CI/CD. It runs locally against a live public site. Retries, HTML/JUnit reporting, screenshots, videos, and traces
+are already configured so the framework can be dropped into a CI pipeline later without any changes to the test code itself.
 
 ## Test Data
 

@@ -44,10 +44,6 @@ export class ContactUsPage {
         this.page = page;
 
         // Navigation & Headers
-        // Note: navigation to this page is handled by
-        // NavbarComponent.clickContactUs(), which is what every spec
-        // actually calls — a separate `contactUsLink`/navigateToContactUs()
-        // pair used to live here but was dead code (never referenced).
         this.getInTouchHeader = page.locator('h2:has-text("Get In Touch")');
         this.successMessage = page.locator('div.status.alert.alert-success');
         this.homeButton = page.locator('.navbar-nav a:has-text("Home")');
