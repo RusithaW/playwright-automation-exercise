@@ -21,6 +21,8 @@ export default defineConfig({
     ['list'],
     ['html', { open: 'never' }],
     ['junit', { outputFile: 'results/results.xml' }],
+    ['line'],
+    ['allure-playwright', { outputFolder: 'allure-results' }]
   ],
 
   /* Global Timeouts */
@@ -66,4 +68,5 @@ export default defineConfig({
       },
     },
   ],
+
 });
