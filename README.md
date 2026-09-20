@@ -293,7 +293,7 @@ The project uses strict TypeScript settings, including:
 The framework provides multiple reporting and debugging options:
 
 - **Playwright HTML Report** – Detailed test execution results
-- **Allure Report** – Interactive test reporting with test steps, attachments, and execution details
+- **Allure Report** – Interactive test reporting with test results, steps, and execution details
 - **JUnit XML Report** – Machine-readable test results for CI/CD integration
 - **Screenshots** – Captured on test failure
 - **Videos** – Captured on test failure
