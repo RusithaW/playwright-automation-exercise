@@ -11,7 +11,7 @@ The framework contains:
 - Page Object Model classes
 - API service and endpoint layers
 - Dynamic test-data generation
-- HTML, JUnit, screenshot, video, and trace reporting
+- HTML, Allure, JUnit, screenshot, video, and trace reporting
 
 ## Tech Stack
 
@@ -19,6 +19,7 @@ The framework contains:
 - TypeScript
 - Faker.js
 - Node.js
+- Allure Report
 - GitHub Actions
 
 ## Project Structure
@@ -289,19 +290,21 @@ The project uses strict TypeScript settings, including:
 
 ## Reports and Debugging
 
-The project generates:
+The framework provides multiple reporting and debugging options:
 
-- HTML reports
-- JUnit XML reports
-- Screenshots on failure
-- Videos on failure
-- Traces on the first retry
+- **Playwright HTML Report** – Detailed test execution results
+- **Allure Report** – Interactive test reporting with test steps, attachments, and execution details
+- **JUnit XML Report** – Machine-readable test results for CI/CD integration
+- **Screenshots** – Captured on test failure
+- **Videos** – Captured on test failure
+- **Playwright Traces** – Captured on the first retry for detailed debugging
 
-View the HTML report:
+### Playwright HTML Report
+
+View the Playwright HTML report:
 
 ```bash
 npm run report
-```
 
 Generated reports should not be committed to Git.
 
